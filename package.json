@@ -1,10 +1,10 @@
 {
-  "name": "devdacticBot",
+  "name": "daedalusBot",
   "version": "0.0.1",
   "description": "Simple testing Node server",
-  "main": "app.js",
-  "author": "Simon Reimler",
-  "license": "MIT",
+  "main": "Daedalus.js",
+  "author": "Andrew Barrett",
+  "license": "Northeastern",
   "dependencies": {
     "express": "^4.x.x",
     "body-parser": "^1.x.x",
