@@ -1,18 +1,26 @@
-`npm botkit google --save`
+var express = require('express');
+var bodyParser = require('body-parser');
+ 
+var app = express();
+var port = process.env.PORT || 1337;
+ 
+app.use(bodyParser.urlencoded({ extended: true }));
+ 
+app.get('/', function (req, res) { res.status(200).send('Hello world!'); });
+ 
+app.listen(port, function () {
+  console.log('Listening on port ' + port);
+});
 
-    'use strict';
-    var Botkit = require('botkit');
-    var google = require('google');
+app.post('/hello', function (req, res, next) {
+  var userName = req.body.user_name;
+  var botPayload = {
+    text : 'Hello ' + userName + ", welcome to the Daedalus ARG! I'm Daedalus, and I'll be your host!"
+  };
 
-    var controller = Botkit.slackbot({
-        debug: false
-    });
-
-    // connect the bot to a stream of messages
-    controller.spawn({
-       token: '<insert here>',
-    }).startRTM();
-
-    controller.hears('hello',    ['direct_message','direct_mention','mention'],function(bot,message) {
-        bot.reply(message,'Hello yourself.');
-    });
+  if (userName !== 'slackbot') {
+    return res.status(200).json(botPayload);
+  } else {
+    return res.status(200).end();
+  }
+});
