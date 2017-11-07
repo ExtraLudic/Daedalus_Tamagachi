@@ -5,20 +5,12 @@ var app = express();
 var port = process.env.PORT || 1337;
 var warmth = 50;
 var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"]
- 
+
+var usercount = 0; 
 app.use(bodyParser.urlencoded({ extended: true }));
  
-app.get('/', function (req, res) { res.status(200).send('Hello world!'); });
- var userName = req.body.user_name;
-  var botPayload = {
-    text : 'Hello ' + userName + ", welcome to the Daedalus ARG! I'm Daedalus, and I'll be your host!"
-  };
-
-  if (userName !== 'slackbot') {
-    return res.status(200).json(botPayload);
-  } else {
-    return res.status(200).end();
-  }
+app.get('/', function (req, res) { res.status(200).send('Hello world! There are ' + usercount + ' users online today!'); });
+ 
 app.listen(port, function () {
   console.log('Listening on port ' + port);
 });
