@@ -10,7 +10,7 @@ var usercount = 0;
 app.use(bodyParser.urlencoded({ extended: true }));
  
 app.get('/', function (req, res) { res.status(200).send('Hello world! There are ' + usercount + ' users online today!'); });
- 
+usercount += 1;
 app.listen(port, function () {
   console.log('Listening on port ' + port);
 });
