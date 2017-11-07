@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var port = process.env.PORT || 1337;
 var warmth = 50;
+var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"]
  
 app.use(bodyParser.urlencoded({ extended: true }));
  
@@ -33,8 +34,15 @@ app.post('/:sunny:', function (req, res, next) {
   else {
     wamth = 100;
   }
+  for(var x = 0; x < warmth/5; x++){
+    progress[x] = ":white_check_mark:"
+  }
+  var progressMsg = 'Yum! Thanks, ' + userName + "! My warmth is now at " + warmth + '%!\n';
+  for(var y = 0; y < progress.length; y++) {
+    progressMsg += progress[y];
+  }
   var botPayload = {
-    text : 'Yum! Thanks, ' + userName + "! My wamth is now at " + warmth + '%!'
+    text : progressMsg
   };
 
   if (userName !== 'slackbot') {
