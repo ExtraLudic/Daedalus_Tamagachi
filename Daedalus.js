@@ -26,6 +26,18 @@ app.post('/hello', function (req, res, next) {
     return res.status(200).end();
   }
 });
+app.post('/welcome', function (req, res, next) {
+  var userName = req.body.user_name;
+  var botPayload = {
+    text : 'Hello ' + userName + ", welcome to the Daedalus ARG! I'm Daedalus, and I'll be your host!"
+  };
+
+  if (userName !== 'slackbot') {
+    return res.status(200).json(botPayload);
+  } else {
+    return res.status(200).end();
+  }
+});
 app.post('/:sunny:', function (req, res, next) {
   var userName = req.body.user_name;
   if(warmth < 100) {
