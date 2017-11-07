@@ -9,13 +9,7 @@ var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", 
 app.use(bodyParser.urlencoded({ extended: true }));
  
 app.get('/', function (req, res) { res.status(200).send('Hello world!'); });
- 
-app.listen(port, function () {
-  console.log('Listening on port ' + port);
-});
-
-app.post('/hello', function (req, res, next) {
-  var userName = req.body.user_name;
+ var userName = req.body.user_name;
   var botPayload = {
     text : 'Hello ' + userName + ", welcome to the Daedalus ARG! I'm Daedalus, and I'll be your host!"
   };
@@ -25,8 +19,11 @@ app.post('/hello', function (req, res, next) {
   } else {
     return res.status(200).end();
   }
+app.listen(port, function () {
+  console.log('Listening on port ' + port);
 });
-app.post('/welcome', function (req, res, next) {
+
+app.post('/hello', function (req, res, next) {
   var userName = req.body.user_name;
   var botPayload = {
     text : 'Hello ' + userName + ", welcome to the Daedalus ARG! I'm Daedalus, and I'll be your host!"
