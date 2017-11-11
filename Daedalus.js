@@ -3,10 +3,14 @@ var bodyParser = require('body-parser');
  
 var app = express();
 var port = process.env.PORT || 1337;
-var warmth = 50;
+var warmth = 0;
 var statusTime = 1000;
 var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"]
 
+var eggemoji = "http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg";
+var daedalusemoji = "https://avatars.slack-edge.com/2017-11-08/269162770516_e2c4553016a99b14da83_72.png";
+var bottestingid = 'C7WLECZAR';
+var tamagachichannelid = "C7TBXMMQ8";
 var gameover = false;
 
 var Botkit = require('botkit');
@@ -15,28 +19,42 @@ var controller = Botkit.slackbot();
 
 var bot = controller.spawn({
 
-  token: "xoxb-270188256679-fEXYX18qd7JXMzVGhLF0IfAV"
+  token: "xoxb-270188256679-nda7Z5n4Z9OC5pK2mKZC9d52"
 
 })
 
 bot.startRTM(function(err,bot,payload) {
 
   bot.say(
-    {
-      username: 'Tamagachi',
-      text: "I'm an egg. Keep me warm to hatch me.",
-      channel: 'C7WLECZAR',
-      icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
-    }
-  );
+        {
+        username: 'Daedalus',
+        text: "Hey there, player! Welcome to the Tamagachi minigame! To get started, type 'New Tamagachi'!",
+        channel: tamagachichannelid,
+        icon_url: daedalusemoji
+        }
+        );
   if (err) {
 
     throw new Error('Could not connect to Slack');
 
   }
-setInterval(
-function(){
-if(statusTime > 0) {
+
+});
+
+controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+    if(warmth <= 0 || warmth > 100) {
+        warmth = 50;
+        bot.say(
+        {
+        username: 'Tamagachi',
+        text: "I'm an egg. Keep me warm to hatch me.",
+        channel: tamagachichannelid,
+        icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+        }
+        );
+        setInterval(
+    function(){
+    if(statusTime > 0) {
         statusTime -= 1;
     }
     else{
@@ -74,7 +92,7 @@ if(statusTime > 0) {
         {
          username: 'Tamagachi',
          text: statusMsg,
-         channel: 'C7WLECZAR',
+         channel: tamagachichannelid,
          icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
         });
         }
@@ -82,8 +100,8 @@ if(statusTime > 0) {
             bot.say(
         {
          username: 'Tamagachi',
-         text: "You lose! Would you like to try again?",
-         channel: 'C7WLECZAR',
+         text: "You lose! To restart, type 'New Tamagachi'!",
+         channel: tamagachichannelid,
          icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
         });
             gameover = true;
@@ -91,8 +109,8 @@ if(statusTime > 0) {
         statusTime = 1000;
     }
 }, 5);
+    }
 });
-
 controller.hears(["Hello","Hi"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
 
   bot.reply(message,'Hello, how are you today?');
@@ -106,8 +124,8 @@ controller.hears([":sunny:"],["direct_message","direct_mention","mention","ambie
     bot.say(
         {
          username: 'Tamagachi',
-         text: "I'm cooked! Would you like to restart?",
-         channel: 'C7WLECZAR',
+         text: "I'm cooked! To restart, type 'New Tamagachi'!",
+         channel: tamagachichannelid,
          icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
         });
   }
@@ -125,7 +143,7 @@ controller.hears([":sunny:"],["direct_message","direct_mention","mention","ambie
         {
          username: 'Tamagachi',
          text: progressMsg,
-         channel: 'C7WLECZAR',
+         channel: tamagachichannelid,
          icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
         });
 });
@@ -168,7 +186,7 @@ controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly
         {
          username: 'Tamagachi',
          text: statusMsg,
-         channel: 'C7WLECZAR',
+         channel: tamagachichannelid,
          icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
         });
         }
@@ -177,8 +195,8 @@ controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly
     bot.say(
         {
          username: 'Tamagachi',
-         text: "You lose! Would you like to restart?",
-         channel: 'C7WLECZAR',
+         text: "You lose! To restart, type 'New Tamagachi'!",
+         channel: tamagachichannelid,
          icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
         });
         gameover = true;
