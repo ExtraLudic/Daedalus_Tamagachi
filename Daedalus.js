@@ -4,11 +4,17 @@ var bodyParser = require('body-parser');
 var app = express();
 var port = process.env.PORT || 1337;
 var warmth = 0;
+var hunger = 0;
 var statusTime = 1000;
-var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"]
+var hatchedstatusTime = 1000;
+var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"];
+var hungermeter = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"];
 
 var eggemoji = "http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg";
 var daedalusemoji = "https://avatars.slack-edge.com/2017-11-08/269162770516_e2c4553016a99b14da83_72.png";
+var chickemoji = "http://d2trtkcohkrm90.cloudfront.net/images/emoji/apple/ios-10/256/front-facing-baby-chick.png";
+var skullemoji = "https://www.emojibase.com/resources/img/emojis/apple/x1f480.png.pagespeed.ic.sgphl_7Fk3.png";
+var hatchedCount = 0;
 var bottestingid = 'C7WLECZAR';
 var tamagachichannelid = "C7TBXMMQ8";
 var gameover = false;
@@ -49,10 +55,10 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
         username: 'Tamagachi',
         text: "I'm an egg. Keep me warm to hatch me.",
         channel: tamagachichannelid,
-        icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+        icon_url: eggemoji
         }
         );
-        setInterval(
+        var eggintervalID = setInterval(
     function(){
     if(statusTime > 0) {
         statusTime -= 1;
@@ -72,6 +78,9 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
             progress[x] = ":red_circle:";
         }
         var statusMsg = 'My current warmth is at ' + warmth + '%!\n';
+        if(warmth <= 90 && warmth >= 70){
+            hatchedCount += 1;
+        }
         if(warmth <= 100 && warmth >= 80){
             statusMsg += "It's chilly but I'm okay.\n"; 
         }
@@ -84,7 +93,73 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
         else {
             statusMsg += "I'm like a inch from death, dude! SAVE ME!\n";
         }
-        if(warmth > 0 && warmth <= 100) {
+        if(hatchedCount >= 5) {
+            bot.say(
+                hunger = 80;
+                {
+                username: 'Tamagachi',
+                text: "I hatched! I'm a weird chicken thing now! Please help me stay alive.",
+                channel: tamagachichannelid,
+                icon_url: chickemoji
+                });
+            clearInterval(eggintervalID);
+            var chickintervalID = setInterval(function() {
+                if(hatchedstatusTime > 0){
+                    hatchedstatusTime -= 1;
+                }
+                else {
+                    if(hunger > 0 && hunger <= 100) {
+                        hunger -= 10;
+                    }
+                    else if(hunger < 0){
+                        hunger = 0;
+                    }
+                    for(var x = 0; x < hunger/10; x++){
+                        hungermeter[x] = ":white_check_mark:";
+                    }
+                    for(var x = hunger/10; x < 10; x++){
+                        hungermeter[x] = ":red_circle:";
+                    }
+                    var hungerstatusMsg = 'My current hunger is at ' + hunger + '%!\n';
+                    if(hunger <= 100 && hunger >= 90){
+                        hungerstatusMsg += "I'm all full now, thanks!\n"; 
+                    }
+                    else if(hunger < 90 && hunger >= 70){
+                        hungerstatusMsg += "Hmm... I think I could use a snack....\n";
+                    }
+                    else if(hunger < 70 && hunger >= 30){
+                        hungerstatusMsg += "I'm really, really hungry! Please feed me!\n";
+                    }
+                    else {
+                        hungerstatusMsg += "I'm STARVING! FEED ME NOW!\n";
+                    }
+
+                    if(hunger > 0 && hunger <= 100){
+                        for(var y = 0; y < hungermeter.length; y++){
+                            hungerstatusMsg += hungermeter[y];
+                        }
+                        bot.say(
+                        {
+                            username: 'Tamagachi',
+                            text: hungerstatusMsg,
+                            channel: tamagachichannelid,
+                            icon_url: chickemoji
+                        });
+                    }
+                    else if(hunger <= 0){
+                        clearInterval(chickintervalID);
+                        bot.say({
+                            username: 'Tamagachi',
+                            text: "You lose! To restart, type 'New Tamagachi'!",
+                            channel: tamagachichannelid,
+                            icon_url: skullemoji
+                        });
+                    }
+                    hatchedstatusTime = 1000;
+                }
+            }, 5);
+        }
+        else if(warmth > 0 && warmth <= 100) {
         for(var y = 0; y < progress.length; y++) {
             statusMsg += progress[y];
         }
@@ -93,16 +168,18 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
          username: 'Tamagachi',
          text: statusMsg,
          channel: tamagachichannelid,
-         icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+         icon_url: eggemoji
         });
         }
         else if (warmth <= 0 && !gameover) {
+
+            clearInterval(eggintervalID);
             bot.say(
         {
          username: 'Tamagachi',
          text: "You lose! To restart, type 'New Tamagachi'!",
          channel: tamagachichannelid,
-         icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+         icon_url: skullemoji
         });
             gameover = true;
         }
@@ -121,12 +198,14 @@ controller.hears([":sunny:"],["direct_message","direct_mention","mention","ambie
   statusTime = 1000;
   warmth += 5;
   if(warmth > 100) {
+
+    clearInterval(eggintervalID);
     bot.say(
         {
          username: 'Tamagachi',
          text: "I'm cooked! To restart, type 'New Tamagachi'!",
          channel: tamagachichannelid,
-         icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+         icon_url: skullemoji
         });
   }
   for(var x = 0; x < warmth/5; x++){
@@ -144,7 +223,7 @@ controller.hears([":sunny:"],["direct_message","direct_mention","mention","ambie
          username: 'Tamagachi',
          text: progressMsg,
          channel: tamagachichannelid,
-         icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+         icon_url: eggemoji
         });
 });
 controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly_sunny_rain:", ":cloud:", ":rain_cloud:", ":thunder_cloud_and_rain:", ":lightning:", ":zap:", ":snowflake:", ":snow_cloud:", ":tornado:", ":fog:", ":umbrella_with_rain_drops:"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
@@ -187,7 +266,7 @@ controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly
          username: 'Tamagachi',
          text: statusMsg,
          channel: tamagachichannelid,
-         icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+         icon_url: eggemoji
         });
         }
   }
@@ -197,8 +276,9 @@ controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly
          username: 'Tamagachi',
          text: "You lose! To restart, type 'New Tamagachi'!",
          channel: tamagachichannelid,
-         icon_url: 'http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg'
+         icon_url: skullemoji
         });
+        clearInterval(eggintervalID);
         gameover = true;
   }
   
