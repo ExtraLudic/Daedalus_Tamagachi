@@ -15,6 +15,7 @@ var daedalusemoji = "https://avatars.slack-edge.com/2017-11-08/269162770516_e2c4
 var chickemoji = "http://d2trtkcohkrm90.cloudfront.net/images/emoji/apple/ios-10/256/front-facing-baby-chick.png";
 var skullemoji = "https://www.emojibase.com/resources/img/emojis/apple/x1f480.png.pagespeed.ic.sgphl_7Fk3.png";
 var hatchedCount = 0;
+var winCount = 0;
 var bottestingid = 'C7WLECZAR';
 var tamagachichannelid = "C7TBXMMQ8";
 var gameover = false;
@@ -98,7 +99,7 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
                 hunger = 80;
                 {
                 username: 'Tamagachi',
-                text: "I hatched! I'm a weird chicken thing now! Please help me stay alive.",
+                text: "I hatched! I'm a weird chicken thing now! Please help me stay alive. If you do a good job, I will reward you with something great!",
                 channel: tamagachichannelid,
                 icon_url: chickemoji
                 });
@@ -182,6 +183,16 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
          icon_url: skullemoji
         });
             gameover = true;
+        }
+        if(winCount >= 10) {
+            bot.say(
+                hunger = 80;
+                {
+                username: 'Tamagachi',
+                text: "Thanks for helping me thrive! Enjoy this alphanumeric code: sqd09erbs2. To restart, type 'new tamagachi'.",
+                channel: tamagachichannelid,
+                icon_url: chickemoji
+                });
         }
         statusTime = 1000;
     }
@@ -283,4 +294,94 @@ controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly
   }
   
         statusTime = 1000;
+});
+controller.hears([":green_apple:", ":apple:", ":pear:", ":tangerine:", ":lemon:", ":banana:", ":watermelon:", ":grapes:", ":strawberry:", ":melon:", ":cherries:", ":peach:", ":pinapple:", ":tomato:", ":eggplant:", ":hot_pepper:", ":corn:", ":sweet_potato:"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+  hatchedstatusTime = 1000;
+  hunger += 10;
+  if(hunger > 100) {
+
+    clearInterval(chickintervalID);
+    bot.say(
+        {
+         username: 'Tamagachi',
+         text: "Ow, I have a tummy ache! To restart, type 'New Tamagachi'!",
+         channel: tamagachichannelid,
+         icon_url: skullemoji
+        });
+  }
+  for(var x = 0; x < hunger/10; x++){
+    hungermeter[x] = ":white_check_mark:";
+  }
+  var hungerstatusMsg = 'Yum! Thanks! My hunger is now at ' + hunger + '%!\n';
+  for(var y = 0; y < hungermeter.length; y++) {
+    hungerstatusMsg += hungermeter[y];
+  }
+  if(warmth > 100){
+    hungerstatusMsg = "";
+  }
+  bot.say(
+        {
+         username: 'Tamagachi',
+         text: hungerstatusMsg,
+         channel: tamagachichannelid,
+         icon_url: chickemoji
+        });
+});
+controller.hears([":honey_pot:", ":bread:", ":cheese_wedge:", ":poultry_leg:", ":meat_on_bone:", ":fried_shrimp:", ":egg:", ":hamburger:", ":fries:", ":hotdog:", ":pizza:", ":spaghetti:", ":taco:", ":burrito:", ":ramen:", ":stew:", ":fish_cake:", ":sushi:", ":bento:", ":curry:", ":rice_ball:", ":rice:", ":rice_cracker:", ":oden:", ":dango:", ":shaved_ice:", ":ice_cream:", ":icecream:", ":cake:", ":birthday:", ":custard:", ":candy:", ":lollipop:", ":chocolate_bar:", ":popcorn:", ":doughnut:", ":cookie:", ":beer:", ":beers:", ":wine_glass:", ":cocktail:", ":tropical_drink:", ":champagne:", ":sake:", ":tea:", ":coffee:", ":baby_bottle:"],function(bot,message) {
+  hatchedstatusTime = 1000;
+  if(hunger > 0) {
+    hunger -= 5;
+    hunger += 5;
+    var hungerstatusMsg = "Ew! I can't eat that! ";
+        if(hunger > 0 && hunger <= 100) {
+            hunger -= 10;
+        }
+        else if(hunger < 0){
+            hunger = 0;
+        }
+        for(var x = 0; x < hunger/10; x++){
+            hungermeter[x] = ":white_check_mark:";
+        }
+        for(var x = hunger/10; x < 10; x++){
+            hungermeter[x] = ":red_circle:";
+        }
+        var hungerstatusMsg = 'My current hunger is at ' + hunger + '%!\n';
+        if(hunger <= 100 && hunger >= 90){
+            hungerstatusMsg += "I'm all full now, thanks!\n"; 
+        }
+        else if(hunger < 90 && hunger >= 70){
+            hungerstatusMsg += "Hmm... I think I could use a snack....\n";
+        }
+        else if(hunger < 70 && hunger >= 30){
+            hungerstatusMsg += "I'm really, really hungry! Please feed me!\n";
+        }
+        else {
+            hungerstatusMsg += "I'm STARVING! FEED ME NOW!\n";
+        }
+        if(hunger >= 0 && hunger <= 100) {
+        for(var y = 0; y < hungermeter.length; y++) {
+            hungerstatusMsg += hungermeter[y];
+        }
+        bot.say(
+        {
+         username: 'Tamagachi',
+         text: hungerstatusMsg,
+         channel: tamagachichannelid,
+         icon_url: chickemoji
+        });
+        }
+  }
+  else {
+    bot.say(
+        {
+         username: 'Tamagachi',
+         text: "You lose! To restart, type 'New Tamagachi'!",
+         channel: tamagachichannelid,
+         icon_url: skullemoji
+        });
+        clearInterval(chickintervalID);
+        gameover = true;
+  }
+  
+  hatchedstatusTime = 1000;
 });
