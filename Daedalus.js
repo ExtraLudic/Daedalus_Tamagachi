@@ -22,11 +22,35 @@ var gameover = false;
 
 var Botkit = require('botkit');
 
-var controller = Botkit.slackbot();
+var controller = Botkit.slackbot({
+  json_file_store: './db_slackbutton_bot/',
+  interactive_replies: true,
+  debug: true,
+  require_delivery: true
+}).configureSlackApp({
+    clientId: "284487422181.283793397088",
+    clientSecret: 'e0409faa585e9ac36722fd5be19125c1',
+    scopes: ['commands', 'bot'],
+});;
+
+controller.setupWebserver((port), function(err, webserver) {
+    controller.createWebhookEndpoints(controller.webserver);
+
+    controller.createOauthEndpoints(controller.webserver, function(err, req, res) {
+        if (err) {
+            res.status(500).send('ERROR: ' + err);
+        } else {
+            res.send('Success!');
+        }
+    });
+
+    // If not also opening an RTM connection
+    controller.startTicking();
+});
 
 var bot = controller.spawn({
 
-  token: "xoxb-270188256679-nda7Z5n4Z9OC5pK2mKZC9d52"
+  token: "xoxb-283934994183-2R1KGl7py3W1fHI6VE3GqGfq"
 
 })
 
@@ -95,8 +119,8 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
             statusMsg += "I'm like a inch from death, dude! SAVE ME!\n";
         }
         if(hatchedCount >= 5) {
+            hunger = 80;
             bot.say(
-                hunger = 80;
                 {
                 username: 'Tamagachi',
                 text: "I hatched! I'm a weird chicken thing now! Please help me stay alive. If you do a good job, I will reward you with something great!",
@@ -186,7 +210,6 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
         }
         if(winCount >= 10) {
             bot.say(
-                hunger = 80;
                 {
                 username: 'Tamagachi',
                 text: "Thanks for helping me thrive! Enjoy this alphanumeric code: sqd09erbs2. To restart, type 'new tamagachi'.",
