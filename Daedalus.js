@@ -9,6 +9,7 @@ var statusTime = 1000;
 var hatchedstatusTime = 1000;
 var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"];
 var hungermeter = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"];
+var poopmeter = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"]
 
 var eggemoji = "http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg";
 var daedalusemoji = "https://avatars.slack-edge.com/2017-11-08/269162770516_e2c4553016a99b14da83_72.png";
@@ -16,9 +17,13 @@ var chickemoji = "http://d2trtkcohkrm90.cloudfront.net/images/emoji/apple/ios-10
 var skullemoji = "https://www.emojibase.com/resources/img/emojis/apple/x1f480.png.pagespeed.ic.sgphl_7Fk3.png";
 var hatchedCount = 0;
 var winCount = 0;
+var poopCount = 0;
+var poops = 0;
 var bottestingid = 'C7WLECZAR';
 var tamagachichannelid = "C7TBXMMQ8";
+var started = false;
 var gameover = false;
+var hatched = false;
 
 var Botkit = require('botkit');
 
@@ -50,7 +55,7 @@ controller.setupWebserver((port), function(err, webserver) {
 
 var bot = controller.spawn({
 
-  token: "xoxb-283934994183-2R1KGl7py3W1fHI6VE3GqGfq"
+  token: "xoxb-283934994183-t5aMRUyi3tReh0qjdJDCH793"
 
 })
 
@@ -73,6 +78,9 @@ bot.startRTM(function(err,bot,payload) {
 });
 
 controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+	hatched = false;
+	gameover = false;
+	started = true;
     if(warmth <= 0 || warmth > 100) {
         warmth = 50;
         bot.say(
@@ -120,6 +128,7 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
         }
         if(hatchedCount >= 5) {
             hunger = 80;
+            hatched = true;
             bot.say(
                 {
                 username: 'Tamagachi',
@@ -129,6 +138,66 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
                 });
             clearInterval(eggintervalID);
             var chickintervalID = setInterval(function() {
+            	if(statusTime > 0){
+            		statusTime -= 1;
+            	}
+            	else {
+            		if(warmth > 0 && warmth <= 100) {
+			            warmth -= 5;
+			        }
+			        else if(warmth < 0){
+			            warmth = 0;
+			        }
+			        for(var x = 0; x < warmth/5; x++){
+			            progress[x] = ":white_check_mark:";
+			        }
+			        for(var x = warmth/5; x < 20; x++){
+			            progress[x] = ":red_circle:";
+			        }
+			        var statusMsg = 'My current warmth is at ' + warmth + '%!\n';
+			        if(warmth <= 90 && warmth >= 70){
+			            hatchedCount += 1;
+			        }
+			        if(warmth <= 100 && warmth >= 80){
+			            statusMsg += "It's chilly but I'm okay.\n"; 
+			        }
+			        else if(warmth < 80 && warmth >= 50){
+			            statusMsg += "Please turn up the heat now.\n";
+			        }
+			        else if(warmth < 50 && warmth >= 20){
+			            statusMsg += "Critical I need warmth!!!!\n";
+			        }
+			        else {
+			            statusMsg += "I'm like a inch from death, dude! SAVE ME!\n";
+			        }
+
+			        if(warmth > 0 && warmth <= 100) {
+			        for(var y = 0; y < progress.length; y++) {
+			            statusMsg += progress[y];
+			        }
+			        bot.say(
+			        {
+			         username: 'Tamagachi',
+			         text: statusMsg,
+			         channel: tamagachichannelid,
+			         icon_url: chickemoji
+			        });
+			        }
+			        else if (warmth <= 0 && !gameover) {
+
+			            clearInterval(eggintervalID);
+			            bot.say(
+			        {
+			         username: 'Tamagachi',
+			         text: "You lose! To restart, type 'New Tamagachi'!",
+			         channel: tamagachichannelid,
+			         icon_url: skullemoji
+			        });
+			            gameover = true;
+			            started = false;
+			        }
+			        statusTime = 3000;
+            	}
                 if(hatchedstatusTime > 0){
                     hatchedstatusTime -= 1;
                 }
@@ -147,6 +216,7 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
                     }
                     var hungerstatusMsg = 'My current hunger is at ' + hunger + '%!\n';
                     if(hunger <= 100 && hunger >= 90){
+                    	winCount++;
                         hungerstatusMsg += "I'm all full now, thanks!\n"; 
                     }
                     else if(hunger < 90 && hunger >= 70){
@@ -159,6 +229,19 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
                         hungerstatusMsg += "I'm STARVING! FEED ME NOW!\n";
                     }
 
+			        if(winCount >= 10) {
+			            clearInterval(chickintervalID);
+			            gameover = true;
+			            started = false;
+			            hatched = false;
+			            bot.say(
+			                {
+			                username: 'Tamagachi',
+			                text: "Thanks for helping me thrive! Enjoy this alphanumeric code: sqd09erbs2. To restart, type 'new tamagachi'.",
+			                channel: tamagachichannelid,
+			                icon_url: chickemoji
+			                });
+			        }
                     if(hunger > 0 && hunger <= 100){
                         for(var y = 0; y < hungermeter.length; y++){
                             hungerstatusMsg += hungermeter[y];
@@ -207,15 +290,7 @@ controller.hears(["New Tamagachi"],["direct_message","direct_mention","mention",
          icon_url: skullemoji
         });
             gameover = true;
-        }
-        if(winCount >= 10) {
-            bot.say(
-                {
-                username: 'Tamagachi',
-                text: "Thanks for helping me thrive! Enjoy this alphanumeric code: sqd09erbs2. To restart, type 'new tamagachi'.",
-                channel: tamagachichannelid,
-                icon_url: chickemoji
-                });
+            started = false;
         }
         statusTime = 1000;
     }
@@ -229,7 +304,7 @@ controller.hears(["Hello","Hi"],["direct_message","direct_mention","mention","am
 });
 
 controller.hears([":sunny:"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
-  statusTime = 1000;
+  if(gameover == false && started == true) {
   warmth += 5;
   if(warmth > 100) {
 
@@ -252,15 +327,29 @@ controller.hears([":sunny:"],["direct_message","direct_mention","mention","ambie
   if(warmth > 100){
     progressMsg = "";
   }
-  bot.say(
-        {
-         username: 'Tamagachi',
-         text: progressMsg,
-         channel: tamagachichannelid,
-         icon_url: eggemoji
-        });
+  if(hatched) {
+  	statusTime = 3000;
+	        bot.say(
+	        {
+	         username: 'Tamagachi',
+	         text: statusMsg,
+	         channel: tamagachichannelid,
+	         icon_url: chickemoji
+	        });
+        }
+        else {
+        	statusTime = 1000;
+	        bot.say(
+	        {
+	         username: 'Tamagachi',
+	         text: statusMsg,
+	         channel: tamagachichannelid,
+	         icon_url: eggemoji
+	        });
+        }
 });
 controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly_sunny_rain:", ":cloud:", ":rain_cloud:", ":thunder_cloud_and_rain:", ":lightning:", ":zap:", ":snowflake:", ":snow_cloud:", ":tornado:", ":fog:", ":umbrella_with_rain_drops:"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+  if(gameover == false && started == true) {
   statusTime = 1000;
   if(warmth > 0) {
     warmth -= 5;
@@ -295,13 +384,26 @@ controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly
         for(var y = 0; y < progress.length; y++) {
             statusMsg += progress[y];
         }
-        bot.say(
-        {
-         username: 'Tamagachi',
-         text: statusMsg,
-         channel: tamagachichannelid,
-         icon_url: eggemoji
-        });
+        if(hatched) {
+        	statusTime = 3000;
+	        bot.say(
+	        {
+	         username: 'Tamagachi',
+	         text: statusMsg,
+	         channel: tamagachichannelid,
+	         icon_url: chickemoji
+	        });
+        }
+        else {
+        	statusTime = 1000;
+	        bot.say(
+	        {
+	         username: 'Tamagachi',
+	         text: statusMsg,
+	         channel: tamagachichannelid,
+	         icon_url: eggemoji
+	        });
+        }
         }
   }
   else {
@@ -314,15 +416,17 @@ controller.hears([":mostly_sunny:", ":partly_sunny:", ":barely_sunny:", ":partly
         });
         clearInterval(eggintervalID);
         gameover = true;
+        started = false;
   }
   
         statusTime = 1000;
+    }
 });
 controller.hears([":green_apple:", ":apple:", ":pear:", ":tangerine:", ":lemon:", ":banana:", ":watermelon:", ":grapes:", ":strawberry:", ":melon:", ":cherries:", ":peach:", ":pinapple:", ":tomato:", ":eggplant:", ":hot_pepper:", ":corn:", ":sweet_potato:"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+  if(gameover == false && hatched == true && started == true) {
   hatchedstatusTime = 1000;
   hunger += 10;
   if(hunger > 100) {
-
     clearInterval(chickintervalID);
     bot.say(
         {
@@ -349,8 +453,45 @@ controller.hears([":green_apple:", ":apple:", ":pear:", ":tangerine:", ":lemon:"
          channel: tamagachichannelid,
          icon_url: chickemoji
         });
+  poopCount += 1;
+  if(poopCount == 3) {
+  	poops += 1;
+  	for(int x = 0; x < poops; x++) {
+  		poopmeter[x] = ":poop:";
+  	}
+  	var poopStatusMsg
+  	if(poops <= 2) {
+  		poopStatusMsg = "I poo'd. Please clean it up.\n";
+    }
+    else if(poops == 3) {
+  		poopStatusMsg = "I feel sick. Please clean me!\n";
+    }
+    else if(poops == 4) {
+  		poopStatusMsg = "This is disgusting! I feel awful! Clean me now!\n";
+    }
+    else if(poops == 5) {
+    	clearInterval(chickintervalID);
+    	gameover = true;
+    	started = false;
+  		poopStatusMsg = "I died of dysentary. Type 'New Tamagachi' to restart\n";
+    }
+    for(int x = 0; x < poopmeter.length; x++) {
+    	poopStatusMsg += poopmeter[x];
+    }
+  	bot.say(
+        {
+         username: 'Tamagachi',
+         text: hungerstatusMsg,
+         channel: poopStatusMsg,
+         icon_url: chickemoji
+        });
+  	poops = 0;
+  	poopCount = 0;
+  	}
+	}
 });
 controller.hears([":honey_pot:", ":bread:", ":cheese_wedge:", ":poultry_leg:", ":meat_on_bone:", ":fried_shrimp:", ":egg:", ":hamburger:", ":fries:", ":hotdog:", ":pizza:", ":spaghetti:", ":taco:", ":burrito:", ":ramen:", ":stew:", ":fish_cake:", ":sushi:", ":bento:", ":curry:", ":rice_ball:", ":rice:", ":rice_cracker:", ":oden:", ":dango:", ":shaved_ice:", ":ice_cream:", ":icecream:", ":cake:", ":birthday:", ":custard:", ":candy:", ":lollipop:", ":chocolate_bar:", ":popcorn:", ":doughnut:", ":cookie:", ":beer:", ":beers:", ":wine_glass:", ":cocktail:", ":tropical_drink:", ":champagne:", ":sake:", ":tea:", ":coffee:", ":baby_bottle:"],function(bot,message) {
+   if(gameover == false && hatched == true && started == true) {
   hatchedstatusTime = 1000;
   if(hunger > 0) {
     hunger -= 5;
@@ -404,7 +545,36 @@ controller.hears([":honey_pot:", ":bread:", ":cheese_wedge:", ":poultry_leg:", "
         });
         clearInterval(chickintervalID);
         gameover = true;
+        started = false;
   }
   
   hatchedstatusTime = 1000;
+	}
+});
+
+controller.hears([":sweat_drops:", ":droplet:", ":potable_water:", ":ocean:"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
+	if(poops > 0 && hatched == true) {
+	var poopStatusMsg = "";
+	poops -= 1;
+	for(int x = poopmeter.length - 1; x >= poops; x--) {
+    	poopmeter[x] = ":red_circle:";
+    }
+	for(int x = 0; x < poopmeter.length; x++) {
+    	poopStatusMsg += poopmeter[x];
+    }
+    if(poop == 0) {
+    	poopStatusMsg = "All Clean! Thanks!\n" + poopStatusMsg;
+    }
+    else {
+    	poopStatusMsg = "Thanks!\n" + poopStatusMsg;
+    }
+  	bot.say(
+        {
+         username: 'Tamagachi',
+         text: hungerstatusMsg,
+         channel: poopStatusMsg,
+         icon_url: chickemoji
+        });
+
+	}
 });
