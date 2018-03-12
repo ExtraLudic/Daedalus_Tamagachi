@@ -176,33 +176,6 @@ module.exports = function(controller) {
     
   });
   
-  controller.on("chicken", function(bot, message, user) {
-    
-    say("I'm a chicken! Keep me warm but also feed me!", chickEmoji, bot, message);
-    
-    var vars = {
-      eggEmoji: eggEmoji, 
-      chickEmoji: chickEmoji
-    }     
-    
-    controller.storage.teams.get(bot.config.id, function(err, team) {
-
-      var thisUser = _.findWhere(team.users, { userId: user.id });
-
-      setTimeout(function() {
-        
-        controller.hungerLogic(bot, message, thisUser, vars, function(updated) {
-          saveTeam(bot.config.id, updated);
-        });
-
-        controller.warmthLogic(bot, message, thisUser, vars, function(updated) {
-          saveTeam(bot.config.id, updated);
-        });
-        
-      }, 500);
-    });
-        
-  });
   
   controller.on("warmth", function(bot, message, user, good, input) { 
         
@@ -210,7 +183,7 @@ module.exports = function(controller) {
           
     user.warmth += good*5;
 
-    var text = good ? "Yum! Thanks, I love sun!\n" : "Hmm, that's not what I'm looking for..I'm getting colder!\n";
+    var text = good > 0 ? "Yum! Thanks, I love warmth!\n" : "Hmm, that's not what I'm looking for..I'm getting colder!\n";
 
     var vars = {
       text: text,
@@ -240,163 +213,6 @@ module.exports = function(controller) {
   });
   
   
-  // Food
-  controller.on("food", function(bot, message, user, good, input) {
-  
-    console.log("food event");
-    controller.killTimer("hunger", function() {
-      user.newChicken = false;
-      var text = good ? "Ooh! Yummy!\n" : "Yuck! No thank you.\n";
-
-      good ? user.hunger += 5 : user.hunger -= 5;
-
-      if (good)
-        user.poopCount++;
-
-      console.log("that did something! hunger is now: ", user.hunger);
-
-      var vars = {
-        text: text,
-        input: input,
-        eggEmoji: eggEmoji, 
-        chickEmoji: chickEmoji
-      }
-      
-      controller.hungerLogic(bot, message, user, vars, function(updated) {
-        input = false;
-        
-        if (user.poopCount == 3) {
-          user.poopsPooped++;
-          user.poopCount = 0;
-          
-          controller.poopLogic(bot, message, user, vars, function(u) {
-            saveTeam(bot.config.id, updated, function(saved) {
-              
-              controller.timer(true, saved.userId, "hunger", function(id) {
-
-                controller.storage.teams.get(bot.config.id, function(err, team) {
-
-                  var thisUser = _.findWhere(team.users, { userId: id });
-
-                  if(thisUser.hunger < 0)
-                    thisUser.hunger = 0;
-                  else if(thisUser.hunger <= 100) 
-                    thisUser.hunger -= 5;
-                  
-                  console.log("we are in the hunger event timer");
-
-                  controller.hungerLogic(bot, message, thisUser, vars, function(updated) {
-                    saveTeam(bot.config.id, updated);
-                  });
-
-                });
-
-              });
-
-            });
-          });
-        } else {
-                
-          saveTeam(bot.config.id, updated, function(saved) {
-
-            controller.timer(true, saved.userId, "hunger", function(id) {
-
-              controller.storage.teams.get(bot.config.id, function(err, team) {
-
-                var thisUser = _.findWhere(team.users, { userId: id });
-
-                if(thisUser.hunger < 0)
-                  thisUser.hunger = 0;
-                else if(thisUser.hunger <= 100) 
-                  thisUser.hunger -= 5;
-                else if (thisUser.hunger > 100)
-                  controller.trigger("death", [bot, message, thisUser, "That was too much food! I've fallen over from the weight!"]); 
-
-                console.log("we are in the hunger event timer");
-
-                controller.hungerLogic(bot, message, thisUser, vars, function(updated) {
-                  saveTeam(bot.config.id, updated);
-                });
-
-              });
-
-            });
-
-          });
-          
-        }
-      });
-
-      
-    });
-          
-  });
-  
-  controller.on("cleanup", function(bot, message, user) {
-    
-    console.log("in cleanup", user.poopsPooped);
-    if(user.poopsPooped > 0) {
-
-      user.poopsPooped -= 1;
-      
-      var vars = {
-        eggEmoji: eggEmoji, 
-        chickEmoji: chickEmoji
-      }
-      
-      controller.cleanLogic(bot, message, user, vars, function(updated) {
-            
-        saveTeam(bot.config.id, user, function(saved) {
-
-          controller.timer(true, saved.userId, "hunger", function(id) {
-
-            controller.storage.teams.get(bot.config.id, function(err, team) {
-
-              var thisUser = _.findWhere(team.users, { userId: id });
-
-              if(thisUser.hunger < 0)
-                thisUser.hunger = 0;
-              else if(thisUser.hunger <= 100) 
-                thisUser.hunger -= 5;
-
-              console.log("we are in the hunger event timer");
-
-              controller.hungerLogic(bot, message, thisUser, vars, function(updated) {
-                saveTeam(bot.config.id, updated);
-              });
-
-            });
-
-          });
-          
-          controller.timer(true, saved.userId, "warmth", function(id) {
-
-            controller.storage.teams.get(bot.config.id, function(err, team) {
-
-              var thisUser = _.findWhere(team.users, { userId: id });
-
-              if(thisUser.warmth < 0)
-                thisUser.warmth = 0;
-              else if(thisUser.warmth <= 100) 
-                thisUser.warmth -= 5;
-
-              console.log("we are in the hunger event timer");
-
-              controller.warmthLogic(bot, message, thisUser, vars, function(updated) {
-                saveTeam(bot.config.id, updated);
-              });
-
-            });
-
-          });
-          
-        });
-      });
-
-    }
-    
-  });
-  
   controller.on("death", function(bot, message, user, text) {
     
     user.gameOver = true;
@@ -419,10 +235,6 @@ module.exports = function(controller) {
             },
         ]
       }];
-
-      controller.killTimer("all", function() {
-        say(text, skullEmoji, bot, message, { attachment: attachment });
-      });
       
     });
     
