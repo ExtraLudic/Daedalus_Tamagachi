@@ -132,6 +132,22 @@ var checkEmojis = function(item, type) {
       else 
         score = 5;
       break;
+    case "turtle":
+      if (item == ":droplet:")
+        score = -2;
+      else if (item == ":snow_cloud:" || item == ":snowflake:" || item == ":snowman:" || item == ":snowman_without_snow:") 
+      {
+
+      }
+      else 
+        score = 1;
+      break;
+    case "shrimp":
+      if (item == ":fire:")
+        score = 2;
+      else 
+        score = -1;
+      break;
   }
   
   return score;
