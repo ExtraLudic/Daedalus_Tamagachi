@@ -164,12 +164,13 @@ module.exports = function(controller) {
       }
       saveTeam(bot.config.id, updated, function(saved) {
 
-        setTimeout(function() {
-          if (saved.newHatch && saved.hatched) {
-            controller.trigger("egg_hatched", [bot, message, saved]);
+        console.log(saved.newHatch, saved.hatched);
+        if (saved.newHatch && saved.hatched) {
+          setTimeout(function() {
+            controller.trigger("egg_hatched", [bot, message, saved.tamagotchi_type]);
             say("Wowee, nice work, I've hatched!", chickEmoji, bot, message);
-          }
-        }, 500);
+          }, 500);
+        }
 
       });
       

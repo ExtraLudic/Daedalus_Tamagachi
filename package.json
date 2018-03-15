@@ -18,6 +18,7 @@
     "@slack/client": "^3.16.0",
     "underscore": "^1.8.3",
     "botkit-storage-mongo": "^1.0.7",
-    "botkit-studio-sdk": "^1.0.8"
+    "botkit-studio-sdk": "^1.0.8",
+    "random-emoji": "^1.0.2"
   }
 }
