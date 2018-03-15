@@ -15,7 +15,7 @@ module.exports = function(controller) {
             }
 
             var new_team = false;
-            if (!team || team.users) {
+            if (!team) {
                 team = {
                     id: payload.identity.team_id,
                     createdBy: payload.identity.user_id,

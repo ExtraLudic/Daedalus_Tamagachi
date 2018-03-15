@@ -34,6 +34,7 @@ controller.startTicking();
 var webserver = require(__dirname + '/components/express_webserver.js')(controller);
 
 webserver.get('/', function(req, res){
+  
   res.render('index', {
     domain: req.get('host'),
     protocol: req.protocol,

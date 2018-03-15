@@ -8,41 +8,41 @@ var hbs = require('express-hbs');
 
 module.exports = function(controller) {
 
-    var webserver = express();
-    webserver.use(cookieParser());
-    webserver.use(bodyParser.json());
-    webserver.use(bodyParser.urlencoded({ extended: true }));
+  var webserver = express();
+  webserver.use(cookieParser());
+  webserver.use(bodyParser.json());
+  webserver.use(bodyParser.urlencoded({ extended: true }));
 
-    // set up handlebars ready for tabs
-    webserver.engine('hbs', hbs.express4({partialsDir: __dirname + '/../views/partials'}));
-    webserver.set('view engine', 'hbs');
-    webserver.set('views', __dirname + '/../views/');
+  // set up handlebars ready for tabs
+  webserver.engine('hbs', hbs.express4({partialsDir: __dirname + '/../views/partials'}));
+  webserver.set('view engine', 'hbs');
+  webserver.set('views', __dirname + '/../views/');
 
-  
-    var normalizedPath = require("path").join(__dirname, "express_middleware");
-    require("fs").readdirSync(normalizedPath).forEach(function(file) {
-      require("./express_middleware/" + file)(webserver, controller);
-    });
-  
-    webserver.use(express.static('public'));
 
-    var server = http.createServer(webserver);
-      
-    server.listen(process.env.PORT || 3000, null, function() {
+  var normalizedPath = require("path").join(__dirname, "express_middleware");
+  require("fs").readdirSync(normalizedPath).forEach(function(file) {
+    require("./express_middleware/" + file)(webserver, controller);
+  });
 
-        console.log('Express webserver configured and listening at http://localhost:' + process.env.PORT || 3000);
+  webserver.use(express.static('public'));
 
-    });
+  var server = http.createServer(webserver);
 
-    // import all the pre-defined routes that are present in /components/routes
-    var normalizedPath = require("path").join(__dirname, "routes");
-    require("fs").readdirSync(normalizedPath).forEach(function(file) {
-      require("./routes/" + file)(webserver, controller);
-    });
+  server.listen(process.env.PORT || 3000, null, function() {
 
-    controller.webserver = webserver;
-    controller.httpserver = server;
+      console.log('Express webserver configured and listening at http://localhost:' + process.env.PORT || 3000);
 
-    return webserver;
+  });
+
+  // import all the pre-defined routes that are present in /components/routes
+  var normalizedPath = require("path").join(__dirname, "routes");
+  require("fs").readdirSync(normalizedPath).forEach(function(file) {
+    require("./routes/" + file)(webserver, controller);
+  });
+
+  controller.webserver = webserver;
+  controller.httpserver = server;
+
+  return webserver;
 
 }

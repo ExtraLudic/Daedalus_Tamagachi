@@ -4,94 +4,127 @@ var action;
 
 module.exports = function(controller) {
   
-  controller.getStatus = function(type, int, callback) {
+  controller.getStatus = function(type, int, input, callback) {
     
     console.log(type, int);
-    
-    action = "";
-    statusMsg = "";
-    
+    console.log(input);
+    var status;
     switch (type) {
         
-      case "warmth":
-        getWarmthStatus(int);
+      case "snake":
+        status = getSnakeStatus(int, input);
         break;
         
-      case "hunger":
-        getHungerStatus(int);
-        break;
-        
-      case "poop":
-        getPoopStatus(int);
+      case "chicken":
+        status = getChickenStatus(int, input);
         break;
         
     }
     
-    callback({ msg: statusMsg, action: action });
+    console.log(status);
+    
+    callback(status);
     
   }
   
-  var getWarmthStatus = function(warmth) {
+  var getChickenStatus = function(warmth, input) {
+    action = "";
+    statusMsg = 'My current warmth is at ' + warmth + '%!\n';
+    if (!input)
+      return { msg: statusMsg, action: action };
+
+    if(warmth == 85){
+      action = "hatched";
+    } 
+
+    if (warmth < 20) {
+      statusMsg += "I froze to death. Try again?\n";
+      action = "death";
+    } else if (warmth > 100) {
+      statusMsg += "Oh no, you cooked me! Try again?";
+      action = "death";
+    }
+
+    if (input == ":fire:" || input == ":snowflake:") {
+      var hot = input == ":fire:";
+
+      if (warmth <= 100 && warmth >= 90) {
+        statusMsg += hot ? "Ouch! Ouch! Too hot!\n" : "Still too hot!"; 
+      } else if(warmth <= 80 && warmth >= 70){
+        statusMsg += hot ? "Oh boy, getting close!\n" : "This is a little too cold, can you warm me up please?";
+      } else if(warmth < 65 && warmth >= 55){
+        statusMsg += hot ? "Thanks! Getting toasty! A little warmer please\n" : "No! I need to warm up now!";
+      } else if(warmth <= 50 && warmth >= 20){
+        statusMsg += hot ? "Oh thank goodness! I needed that! A little warmer please!\n" : "Oh no, you’re freezing me!";
+      }
+    } else if (input == "text") {
+      statusMsg += "Ack, I don’t understand! Please warm me up!";
+    } else {
+      statusMsg += "That’s not what I need! Oh no…";
+    }
+    
+    return { msg: statusMsg, action: action }
+    
+  }
+  
+  var getSnakeStatus = function(warmth, input) {
+    statusMsg = 'My current warmth is at ' + warmth + '%!\n';
+    if (!input)
+      return { msg: statusMsg, action: action };
+    
+    if(warmth == 75){
+      action = "hatched";
+    } 
+    
+    if (warmth <= 10) {
+      statusMsg += "I froze to death. Try again?\n";
+      action = "death";
+    } else if (warmth >= 95) {
+      statusMsg += "Oh no, you cooked me! Try again?";
+      action = "death";
+    }
+    
+    if (input == ":sun:") {
+      if (warmth <= 100 && warmth >= 90) {
+        statusMsg += "Ouch! Ouch! Too hot!\n"; 
+      } else if(warmth < 60 && warmth >= 40){
+        statusMsg += "Thanks! Getting toasty! A little warmer please\n";
+      } else if(warmth < 50 && warmth >= 20){
+        statusMsg += "Oh thank goodness! I needed that! A little warmer please!\n";
+      }
+    } else if (input == "text") {
+      statusMsg += "Ack, I don’t understand! Please warm me up!";
+    } else {
+      statusMsg += "That’s not what I need! Oh no…";
+    }
+    
+    return { msg: statusMsg, action: action };
+      
+  }
+  
+  var getLizardStatus = function(warmth, input) {
       statusMsg = 'My current warmth is at ' + warmth + '%!\n';
 
-      if(warmth == 85){
+      if(warmth == 30){
         action = "hatched";
       } 
     
       if (warmth <= 100 && warmth >= 90) {
-        statusMsg += "It's getting a little too warm...\n"; 
-      } else if(warmth <= 90 && warmth >= 80){
-        statusMsg += "You found the sweet spot!\n"; 
-      } else if(warmth <= 80 && warmth >= 70){
-        statusMsg += "It's chilly but I'm okay.\n"; 
-      } else if(warmth < 70 && warmth >= 50){
-        statusMsg += "Please turn up the heat now.\n";
+        statusMsg += input ? "Ouch! Ouch! Too hot!\n" : "Still too hot!"; 
+      } else if(warmth <= 75 && warmth >= 65){
+        statusMsg += input ? "Oh boy, getting close!\n" : "This is a little too cold, can you warm me up please?";
+      } else if(warmth < 65 && warmth >= 50){
+        statusMsg += input ? "Thanks! Getting toasty! A little warmer please\n" : "No! I need to warm up now!";
       } else if(warmth < 50 && warmth >= 20){
-        statusMsg += "Critical I need warmth!!!!\n";
-      } else if (warmth > 0) {
-        statusMsg += "I'm like a inch from death, dude! SAVE ME!\n";
-      } else {
-        statusMsg += "S-s-s-so c-c-c-cold. It's too late for me now...\n";
+        statusMsg += input ? "Oh thank goodness! I needed that! A little warmer please!\n" : "Oh no, you’re freezing me!";
+      }
+    
+      if (warmth <= 10) {
+        statusMsg += "I froze to death. Try again?\n";
+        action = "death";
+      } else if (warmth >= 90) {
+        statusMsg += "Oh no, you cooked me! Try again?";
         action = "death";
       }
-  }
-
-  var getHungerStatus = function(hunger) {
-    statusMsg = 'My current hunger is at ' + hunger + '%!\n';
-    
-    if (hunger > 100) {
-      action = "death";
-      statusMsg += "That was way too much food, I've died!\n";
-    }
-
-    if(hunger <= 100 && hunger >= 90) {
-      action = "full";
-      statusMsg += "I'm all full now, thanks!\n"; 
-    }
-    else if(hunger < 90 && hunger >= 70){
-      statusMsg += "Hmm... I think I could use a snack....\n";
-    }
-    else if(hunger < 70 && hunger >= 30){
-      statusMsg += "I'm really, really hungry! Please feed me!\n";
-    }
-    else if (hunger > 0 && hunger <= 30) {
-      statusMsg += "I'm STARVING! FEED ME NOW!\n";
-    }
-  }
-
-  var getPoopStatus = function(poops) {
-    if(poops <= 2) {
-      statusMsg = "I poo'd. Please clean it up.\n";
-    }
-    else if(poops == 3) {
-      statusMsg = "I feel sick. Please clean me!\n";
-    }
-    else if(poops == 4) {
-      statusMsg = "This is disgusting! I feel awful! Clean me now!\n";
-    }
-    else if(poops == 5) {
-      action = "death";
-      statusMsg = "I died of dysentery.\n";
-    }
   }
 }

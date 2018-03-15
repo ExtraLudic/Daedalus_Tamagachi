@@ -1,18 +1,20 @@
+
+
 module.exports = function(controller) {
   
   controller.warmthLogic = function(bot, message, user, vars, cb) {
 
-    setProgress(user.warmth, user.warmthMeter, "warmth");
+    setProgress(user.warmth, user.warmthMeter, user.tamagotchi_type);
 
-    controller.getStatus("warmth", user.warmth, function(result) {
+    controller.getStatus(user.tamagotchi_type, user.warmth, vars.input, function(result) {
       
-      console.log(result, user.hatched);
+      console.log(result, result.action);
       
       if (result.action != 'death') {
 
         if (result.action == "hatched" && !user.hatched) {
           console.log("we have hatched!!!!!!!");
-          user.newChicken = true;
+          user.newHatch = true;
           user.hatched = true;
         }
 
@@ -35,101 +37,19 @@ module.exports = function(controller) {
     
   };
   
-  controller.hungerLogic = function(bot, message, user, vars, cb) {
-    
-    setProgress(user.hunger, user.hungerMeter, "hunger");
-
-    controller.getStatus("hunger", user.hunger, function(result) {
-
-      if (result.action == "full") 
-        user.fullCount++;
-
-      if (result.action != 'death') {
-
-        var msg = "";
-        
-        if (vars.text)
-          msg = vars.text;
-        
-        if (user.fullCount >= 10) {
-          controller.killTimer("all", function() {
-            msg += "Thanks for helping me thrive! Enjoy this alphanumeric code: sqd09erbs2. To restart, type 'new tamagotchi'.\n";
-            say(msg, bot, message);
-            return;
-            
-          });
-        }
-
-        say(msg + result.msg, vars.chickEmoji, bot, message, { meter: user.hungerMeter });
-
-      } else 
-        controller.trigger("death", [bot, message, user, result.msg]);
-
-      cb(user);
-
-    });
-    
-  };
-  
-  
-  controller.poopLogic = function(bot, message, user, vars, cb) {
-
-    setProgress(user.poopsPooped, user.poopMeter, "poop");
-
-    controller.getStatus("poop", user.poopsPooped, function(result) {
-      
-      if (result.action != 'death') 
-        say(result.msg, vars.chickEmoji, bot, message, { meter: user.poopMeter });
-      else {
-        controller.trigger("death", [bot, message, user, result.msg]);
-      }
-
-      cb(user);
-
-    });
-    
-  };
-  
-  controller.cleanLogic = function(bot, message, user, vars, cb) {
-
-    setProgress(user.poopsPooped, user.poopMeter, "poop");
-
-    var msg;
-
-    if(user.poopsPooped == 0) {
-      msg = "All Clean! Thanks!\n";
-    }
-    else {
-      msg = "Thanks!\n";
-    }
-
-    say(msg, vars.chickEmoji, bot, message, { meter: user.poopMeter });
-    
-    cb(user);
-    
-  };
   
   var setProgress = function(int, progress, type) {
     
     console.log(int, type);
-    var check = type == "warmth" ? ":white_check_mark:" : type == "hunger" ? ":negative_squared_cross_mark:" : ":poop:";
-    var nope = type == "warmth" ? ":o:" : ":x:";
+    var check = ":white_check_mark:";
+    var nope = ":o:";
     
-    if (type == "poop") {
-      for(var x = 0; x < int; x++){
-          progress[x] = check;
-      }
+    for(var x = 0; x < int/5; x++){
+        progress[x] = check;
+    }
 
-    } else {
-
-      for(var x = 0; x < int/5; x++){
-          progress[x] = check;
-      }
-    
-      for(var x = int/5; x < 20; x++){
-          progress[x] = nope;
-      }
-          
+    for(var x = int/5; x < 20; x++){
+        progress[x] = nope;
     }
     
   }

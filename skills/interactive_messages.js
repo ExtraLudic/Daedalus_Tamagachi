@@ -10,27 +10,21 @@ function isUser(member) {
 
 module.exports = function(controller) {
   
-  controller.middleware.receive.use(function(bot, message, next) {
-    if (message.type == 'interactive_message_callback') {
-      // Say something
-      if (message.actions[0].name.match(/^say$/)) {
+  controller.on('interactive_message_callback', function(bot, event) {
+    
+    console.log(event.actions[0].name, "is the interactive message callback event");
+    
+    if (event.actions[0].name.match(/^say(.*)$/)) {
 
-        var reply = message.original_message;
+      var reply = event.original_message;
 
-        if (message.actions[0].value == "start") {
-          
-          console.log("button says start");
-          
-          controller.trigger("new", [bot, message, true]);
-          
-        }
+      console.log(event.actions[0].value)
+      var type = event.actions[0].value.split(" ")[1];
 
-      }
-      
+      controller.trigger("new", [bot, event, true, type]);
+
     }
     
-    next();  
-
   });
   
 };
