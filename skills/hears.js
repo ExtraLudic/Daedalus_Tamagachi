@@ -1,4 +1,3 @@
-
 const _ = require("underscore");
 const request = require("request");
 
@@ -88,12 +87,35 @@ module.exports = function(controller) {
     });
   });
   
+  controller.hears("new (.*)", ["direct_message"], function(bot,message) {
+     
+    if (!["chicken", "shrimp", "snake", "turtle", "lizard"].includes(message.text.split(" ")[1])) return;
+     
+    controller.storage.teams.get(message.team_id, function(err, res) {
+      res.users = _.map(res.users, function(user) {
+        if (user.userId == message.user) {
+          user.tamagotchi_type = message.text.split(" ")[1];
+          user.tamagotchi_started = true;
+          user.stage = 0;
+          user.gameOver = false;
+        }
+        return user;
+      });
+      
+      controller.storage.teams.save(res, function(err, saved) {
+       
+        controller.trigger('new', [bot, message]);
+        
+      });
+    });
+  });
+    
   controller.hears("(.*)", ["direct_message"], function(bot, message) {
     controller.storage.teams.get(message.team_id, function(err, res) {
       
       var thisUser = _.findWhere(res.users, { userId: message.user });
       
-      if (!thisUser.tamagotchi_started) return;
+      if (!thisUser.tamagotchi_started || !thisUser.tamagotchi_type) return;
       
       controller.dataStore(message, "chat");
       
@@ -110,7 +132,7 @@ module.exports = function(controller) {
     });
   });
   
-  
+   
 }
 
 

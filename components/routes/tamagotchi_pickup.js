@@ -16,11 +16,6 @@ module.exports = function(webserver, controller) {
       var thisUser = _.findWhere(team.users, { userId: player });
       var repeated = _.findWhere(team.users, { tamagotchi_type: type });
       
-      if (!thisUser) {
-        thisUser = { userId: player };
-        team.users.push(thisUser);
-      }
-      
       if (thisUser.tamagotchi_started || repeated) {
         // WHOA let's rethink
         var data = {
@@ -29,7 +24,7 @@ module.exports = function(webserver, controller) {
           team: team.id
         }
 
-        request.post({ url: 'https://escape-room-production.glitch.me/tamagotchi_error', form: data }, function(err, req, body) {
+        request.post({ url: 'https://escape-room-' + process.env.environment + '.glitch.me/tamagotchi_error', form: data }, function(err, req, body) {
 
         });
 
@@ -59,7 +54,7 @@ module.exports = function(webserver, controller) {
           };
 
           // post in the gamelog
-          // request.post({ url: 'https://escape-room-production.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
+          request.post({ url: 'https://escape-room-' + process.env.environment + '.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
             bot.api.im.open({ user: data.user.userId }, function(err, direct_message) {
               controller.studio.get(bot, 'onboarding', player, direct_message.channel.id).then(function(convo) {
 
@@ -72,7 +67,7 @@ module.exports = function(webserver, controller) {
                 convo.activate();
               });
             });
-          // });
+          });
           
         });
 
