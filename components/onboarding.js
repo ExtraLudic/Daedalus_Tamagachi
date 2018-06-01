@@ -36,8 +36,8 @@ module.exports = function(controller) {
             // only if team users are empty - sanity check
             web.users.list({}, function (err, users) {
 
+              if (!team.users || team.users.length <= 0) {
                 team.users = [];
-                console.log(users.members);
 
                 _.each(users.members, function(user) {
                   if (isUser(user)) {
@@ -49,6 +49,8 @@ module.exports = function(controller) {
                     team.users.push(user);
                   }
                 }); 
+
+              }
 
               // save the team
               controller.storage.teams.save(team, function(err, saved) {

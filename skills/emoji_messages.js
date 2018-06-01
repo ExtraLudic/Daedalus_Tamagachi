@@ -54,7 +54,7 @@ module.exports = function(controller) {
           amount = -1;
         } else {
           if (type == "turtle" && [":snow_cloud:", ":snowflake:", ":snowman:", ":snowman_without_snow:"].includes(thisEmoji)){
-            controller.trigger("egg_death", [bot, message, thisUser]);
+            controller.trigger("egg_death", [bot, message, thisUser, "You froze me to death!\n"]);
             return;
           }
           amount = checkEmojis(thisEmoji, type);

@@ -153,9 +153,9 @@ module.exports = function(controller) {
                 codeType: "tamagotchi_hatch"
               };
 
-//               request.post({ url: 'https://escape-room-production.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
+              request.post({ url: 'https://escape-room-production.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
 
-//               });
+              });
 
             });
             
@@ -216,7 +216,9 @@ module.exports = function(controller) {
     
     saveTeam(bot.config.id, user, function(saved) {
     
-      if (!text) text = "I've died!";
+      if (!text) text = "I've died!\n";
+      
+      text += "Restarting...\n";
       
       var params = {
         bot: bot, 
@@ -229,7 +231,7 @@ module.exports = function(controller) {
       controller.say(params, function() {
         setTimeout(function() {
           controller.trigger("new", [bot, message, saved.tamagotchi_type]);
-        }, 500);
+        }, 1500);
       });
       
     });

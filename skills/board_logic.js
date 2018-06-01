@@ -33,8 +33,16 @@ module.exports = function(controller) {
       // console.log(newPos, "is the new position");
       
       if (newPos == "death") {
+        
+        message.event = "death";
+        message.newPos = newPos;
+        message.oldPos = currentPos;
+        message.foodLeft = user.food["pos_" + user.stage];
+        controller.dataStore(message, "button");
+        
         controller.trigger("board_disable", [bot, message]);
         controller.trigger("creature_death", [bot, message, user, ":skull_and_crossbones::skull_and_crossbones:You died! Start over now. :skull_and_crossbones::skull_and_crossbones:"]);
+
         return;
       }
       
@@ -46,7 +54,7 @@ module.exports = function(controller) {
       
       user.board[currentPos] = replacementTile;
       user.board[newPos] = userIcon;
-      
+            
       team.users = _.map(team.users, function(u) {
         if (u.userId == user.userId)
           return user;
@@ -80,10 +88,9 @@ module.exports = function(controller) {
             updated: updated, 
             user: user, 
             team: saved, 
-            newPos: newPos
+            newPos: newPos, 
+            oldPos: currentPos
           }
-                  // controller.dataStore(event, "button");
-
           
           controller.trigger("food_pickup_check", [opt])
           
@@ -135,11 +142,13 @@ module.exports = function(controller) {
     
     // console.log(user.food["pos_" + user.stage]);
     var full = false;
+    var fed = false;
 
     _.each(user.food["pos_" + user.stage], function(pos) {
       
       if (newPos == pos) {
         user.food["pos_" + user.stage].splice(user.food["pos_" + user.stage].indexOf(newPos), 1);
+        fed = true;
         console.log("we picked up food");
 
         if (user.food["pos_" + user.stage].length < 1) {
@@ -150,6 +159,11 @@ module.exports = function(controller) {
             controller.getEmoji(user.tamagotchi_type, user.stage, function(emoji) {
               user.creature = emoji;
             });
+            message.event = "food";
+            message.newPos = newPos;
+            message.oldPos = options.oldPos;
+            message.foodLeft = message.foodLeft = user.food["pos_" + user.stage];
+            controller.dataStore(message, "button");
           } else if (user.stage == 2) {
             console.log("we won!");
             var data = {
@@ -164,6 +178,11 @@ module.exports = function(controller) {
             });
             controller.trigger("board_disable", [bot, updated]);
             controller.trigger("win_state", [bot, message, user, "Nice job, you won!! Hmm, what should your prize be..."]);
+            message.event = "win";
+            message.newPos = newPos;
+            message.oldPos = options.oldPos;
+            controller.dataStore(message, "button");
+
             return;
           }
         }
@@ -176,6 +195,7 @@ module.exports = function(controller) {
         });
 
         controller.storage.teams.save(saved, function(err, updatedTeam) {
+          
           if (full) {
             
             controller.getIcon(user.creature, function(url) {
@@ -193,16 +213,6 @@ module.exports = function(controller) {
                 controller.trigger("board_disable", [bot, updated]);
                 controller.trigger("board_setup", [bot, message, user.tamagotchi_type, user.stage]);
                 
-                var data = {
-                  puzzle: user.tamagotchi_type, 
-                  user: user, 
-                  team: bot.config.id, 
-                  codeType: "tamagotchi_evolve"
-                };
-
-//                 request.post({ url: 'https://escape-room-production.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
-
-//                 });
               }, 1000);
             });
             
@@ -210,6 +220,14 @@ module.exports = function(controller) {
         });
       }
     });
+    
+    if (!fed) {
+        message.event = "movement";
+        message.newPos = newPos;
+        message.oldPos = options.oldPos;
+        message.foodLeft = user.food["pos_" + user.stage];
+        controller.dataStore(message, "button");
+    }
 
   });
   

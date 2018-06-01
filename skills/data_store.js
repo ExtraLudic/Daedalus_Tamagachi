@@ -27,6 +27,14 @@ module.exports = function(controller) {
       dataEvent.btnText = button.text;
       dataEvent.value = event.actions[0].value ? event.actions[0].value : event.actions[0].selected_options[0].value;
       dataEvent.from = event.callback_id;
+      
+      if (event.newPos) {
+        dataEvent.newPos = event.newPos;
+        dataEvent.oldPos = event.oldPos;
+        dataEvent.foodLeft = event.foodLeft;
+        dataEvent.event = event.event;
+
+      }
     } else if (type == "chat") {
       dataEvent.message = event.text;
       dataEvent.type = event.type;
