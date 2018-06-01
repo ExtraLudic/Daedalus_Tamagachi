@@ -1,71 +1,37 @@
 const _ = require("underscore");
-// Timeout Variables
-var eggTimeout = 5000;
-var chickTimeout = 5000;
+const request = require("request");
 
-var progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"];
-var hungerMeter = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"];
-var poopMeter = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"]
+const progress = [":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:", ":red_circle:"];
 
-var eggEmoji = "http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg";
-var daedalusEmoji = "https://avatars.slack-edge.com/2017-11-08/269162770516_e2c4553016a99b14da83_72.png";
-var chickEmoji = "http://d2trtkcohkrm90.cloudfront.net/images/emoji/apple/ios-10/256/front-facing-baby-chick.png";
-var skullEmoji = "https://www.emojibase.com/resources/img/emojis/apple/x1f480.png.pagespeed.ic.sgphl_7Fk3.png";
+const creatures = {
+  chicken: [':hatched_chick:', ':chicken:'], 
+  snake: [':snake:', ':crocodile:'], 
+  turtle: [':turtle:', ':sauropod:'], 
+  lizard: [':lizard:', ':t-rex:'], 
+  shrimp: [':shrimp:', ':dragon:']
+}
 
 module.exports = function(controller) {
   
-  var say = function(text, emoji, bot, message, options) {
-    console.log("bot gonna say");
-    var reply = { text: text, icon_url: emoji, username: "Tamagotchi Puzzle" };
-  
-    if (options) {
-
-      if (options.meter) {
-        text += "\n";
-        for(var y = 0; y < options.meter.length; y++){
-            text += options.meter[y];
-        }
-      }
-
-      if (options.attachment) {
-        var attachments = options.attachment;
-        reply.attachments = attachments;
-      }
-      
-      if (options.username)
-        reply.username = options.username;
-    }
-    
-    reply.channel = message.channel;
-      
-    reply.username = reply.username + " ";
-    
-    bot.say(reply);
-
-  }
-  
-  controller.on('new', function(bot, message, start, type) {
-    
-    console.log(message.user);
-    
+  controller.on('new', function(bot, message) {
+        
     var messageUser = message.user ? message.user : message.event.user;
     
-    console.log(messageUser);
-
     controller.storage.teams.get(bot.config.id, function(err, res) {
       
       var thisUser = _.findWhere(res.users, { userId: messageUser });
-      if (start){
-        // trigger new tamagotchi
-        controller.trigger("start", [{
-          bot: bot,
-          message: message,
-          team: res, 
-          user: thisUser, 
-          type: type
-        }]);
-      }
+      console.log(thisUser);
+      // trigger new tamagotchi
+      controller.trigger("start", [{
+        bot: bot,
+        message: message,
+        team: res, 
+        user: thisUser, 
+        type: thisUser.tamagotchi_type
+      }]);
+      
     });
+    
   });
  
   controller.on('start', function(options) {
@@ -81,6 +47,7 @@ module.exports = function(controller) {
     
     thisUser.gameOver = false;
     thisUser.started = true;
+    thisUser.stage = 0;
     
     thisUser.warmth = 50;
     
@@ -88,6 +55,8 @@ module.exports = function(controller) {
       thisUser.warmth = 30;
         
     thisUser.warmthMeter = progress;
+    
+    thisUser.creature = creatures[options.type][0];
     
     var users = _.map(team.users, function(user) {
       if (user.userId == thisUser.userId) {
@@ -114,62 +83,84 @@ module.exports = function(controller) {
     
     if (["chicken", "shrimp", "snake"].includes(type)) 
       text = "Hello! Please hatch me. I’m cold. Can you warm me up?";
-    else if (type == "lizard")
-      text = "Hello! Please hatch me. It’s too hot. Can you warm me up?";
-    else if (type == "turtle")
+    else if (type == "lizard" || type == "turtle")
       text = "Hello! Please hatch me. It’s too hot. Can you cool me down?";
     else 
       text = "What am I ?? Cann ot comput e!! 12095-=F DF 535_ffjpj, F,. C";
 
-    say(text, eggEmoji, bot, message);
+    var params = {
+      bot: bot, 
+      message: message,
+      user: user,
+      text: text,
+      icon: "egg"
+    };
     
-    console.log(user.warmth, "the user who has an egg");
-    console.log(user.userId);
-    
-    var vars = {
-      eggEmoji: eggEmoji, 
-      chickEmoji: chickEmoji
-    }
-    
-    setTimeout(function() {
+    controller.say(params, function() {
 
-      controller.warmthLogic(bot, message, user, vars, function(updated) {
-        console.log(updated);
-         saveTeam(bot.config.id, updated);
-      });
-    
-    }, 500);
-        
+      setTimeout(function() {
+
+        controller.warmthLogic(bot, message, user, {}, function(updated) {
+          saveTeam(bot.config.id, updated);
+        });
+
+      }, 500);
+    });   
     
   });
   
   
   controller.on("warmth", function(bot, message, user, amount, input) { 
         
-    user.newChicken = false;
-          
     user.warmth += amount*5;
 
     var vars = {
-      input: input,
-      eggEmoji: eggEmoji, 
-      chickEmoji: chickEmoji
+      input: input
     }
 
     controller.warmthLogic(bot, message, user, vars, function(updated) {
-      input = false;
-      if (updated.hatched) {
-        updated.gameOver = true;
-        updated.started = false;
-      }
-      saveTeam(bot.config.id, updated, function(saved) {
 
-        console.log(saved.newHatch, saved.hatched);
-        if (saved.newHatch && saved.hatched) {
+      // console.log(updated, " is the user after the warmth logic" );
+      if (updated.hatched && updated.newHatch) {
+        updated.stage = 1;
+        updated.newBoardBtns = true;
+      }
+      
+      saveTeam(bot.config.id, updated, function(savedUser) {
+
+        // console.log(saved.stage, " is the stage we just updated");
+        if (savedUser.stage > 0) {
+          
           setTimeout(function() {
-            controller.trigger("egg_hatched", [bot, message, saved.tamagotchi_type]);
-            say("Wowee, nice work, I've hatched!", chickEmoji, bot, message);
+                        
+            var params = {
+              bot: bot, 
+              message: message,
+              user: savedUser,
+              text: "Wowee, nice work, I've hatched!",
+              icon: savedUser.creature.replace(/:/g, "").replace(/-/g, "")
+            };
+            
+            controller.say(params, function() {
+              console.log("now that we said that, let's set up the board");
+              
+              controller.trigger("board_setup", [bot, message, savedUser.tamagotchi_type, savedUser.stage]);
+              
+              var data = {
+                puzzle: savedUser.tamagotchi_type, 
+                user: savedUser, 
+                team: bot.config.id, 
+                codeType: "tamagotchi_hatch"
+              };
+
+//               request.post({ url: 'https://escape-room-production.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
+
+//               });
+
+            });
+            
           }, 500);
+          
         }
 
       });
@@ -178,8 +169,74 @@ module.exports = function(controller) {
       
   });
   
+  controller.on("win_state", function(bot, message, user, text) {
+    
+    user.gameOver = true;
+    user.won = true;
+    user.started = false;
+    
+    saveTeam(bot.config.id, user, function(saved) {
+    
+      if (!text) text = "You Won!!";
+      var winMsg = text;
+
+      if(["chicken", "lizard"].includes(saved.tamagotchi_type)) {
+        winMsg += "\nOh! I know! A hint! You know that bookshelf you saw earlier? Check out the " + process.env.book + " book.";
+      }
+      else if (["snake", "turtle"].includes(saved.tamagotchi_type)) {
+        winMsg += "\nOh! I know! A hint! You know that bookshelf you saw earlier? Check out the " + process.env.page + " page of a book.";
+      }
+      else if (saved.tamagotchi_type == "shrimp") {
+        winMsg += "\nOh! I know! A hint! You know that bookshelf you saw earlier? Check out the " + process.env.line + " line of a page of a book.";
+      }
+      
+      var creature = saved.creature.replace(/:/g, "");
+      
+      var params = {
+        bot: bot, 
+        message: message,
+        user: user,
+        text: winMsg,
+        icon: saved.creature.replace(/:/g, "").replace(/-/g, "")
+      };
+      
+      controller.say(params, function() {
+      
+      });
+
+    });
+    
+  });
   
-  controller.on("death", function(bot, message, user, text) {
+  
+  controller.on("egg_death", function(bot, message, user, text) {
+    
+    user.gameOver = true;
+    user.started = false;
+    
+    saveTeam(bot.config.id, user, function(saved) {
+    
+      if (!text) text = "I've died!";
+      
+      var params = {
+        bot: bot, 
+        message: message,
+        user: user,
+        text: text,
+        icon: "skull"
+      };
+
+      controller.say(params, function() {
+        setTimeout(function() {
+          controller.trigger("new", [bot, message, saved.tamagotchi_type]);
+        }, 500);
+      });
+      
+    });
+    
+  });
+  
+  controller.on("creature_death", function(bot, message, user, text) {
     
     user.gameOver = true;
     user.started = false;
@@ -187,27 +244,26 @@ module.exports = function(controller) {
     saveTeam(bot.config.id, user, function(saved) {
     
       if (!text) text = "You lose!";
+            
+      var params = {
+        bot: bot, 
+        message: message,
+        user: user,
+        text: text,
+        icon: "skull"
+      };
 
-      var attachment = [{
-        "text": "Click to start over",
-        "callback_id": "restart_game",
-        "attachment_type": "default",
-        "actions": [
-            {
-                "name": "say",
-                "text": "Restart",
-                "type": "button",
-                "value": "start"
-            },
-        ]
-      }];
-      
-      say(text, skullEmoji, bot, message, { attachment: attachment });
-
+      controller.say(params, function() {
+        setTimeout(function() {
+         controller.trigger("board_setup", [bot, message, saved.tamagotchi_type, saved.stage]);
+        }, 500);
+      });
       
     });
     
   });
+  
+  
  
   
   var saveTeam = function(teamId, user, cb) {
@@ -229,7 +285,7 @@ module.exports = function(controller) {
       // console.log(currentUser.newChicken, "is the current user newChicken");
             
       controller.storage.teams.save(result, function(err, saved) {
-        // console.log(err, saved.users);
+        // console.log(err, _.findWhere(saved.users, { userId: currentUser.userId }));
         if (cb) cb(currentUser);
       });
 

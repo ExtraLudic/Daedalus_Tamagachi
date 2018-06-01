@@ -20,5 +20,6 @@
     "botkit-storage-mongo": "^1.0.7",
     "botkit-studio-sdk": "^1.0.8",
     "random-emoji": "^1.0.2"
-  }
+  }, 
+  "engines": { "node": "8.x" }
 }
