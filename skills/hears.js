@@ -1,3 +1,4 @@
+
 const _ = require("underscore");
 const request = require("request");
 
@@ -17,6 +18,19 @@ var specialEmojis = [":fried_egg:"];
 
 module.exports = function(controller) {
   
+  var deleteThisMsg = function(message, token, callback) {
+    
+    // console.log(message, "we are deleting this");
+    
+    var ts = message.message_ts ? message.message_ts : message.ts;
+    
+    var web = new WebClient(token);
+      
+    web.chat.delete(ts, message.channel).then(res => {
+      // console.log(res, "deleted");
+      callback();
+    }).catch(err => console.log(err));
+  }
   // Emoji request 
   request("https://raw.githubusercontent.com/iamcal/emoji-data/master/emoji.json", function(err, res, body) {
     if (!err && res.statusCode == 200) {
@@ -36,34 +50,63 @@ module.exports = function(controller) {
   });
   
   // Hears Functions
+  controller.hears(["return"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
+    
+    controller.storage.teams.get(message.team_id, function(err, res) {
+      res.users = _.map(res.users, function(user) {
+        if (user.userId == message.user) {
+          return { userId: user.userId, name: user.name };
+        } else
+          return user;
+      });
+      controller.storage.teams.save(res, function(err, saved) {
+        console.log(saved, "saved this team, all clear!!");
+        bot.reply(message, "thanks, make sure to pickup a new egg!");
+      });
+    });
+          
+  });
   
   controller.hears(["restart", "start"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
     
     console.log("start");
-    controller.trigger("new", [bot, message, true]);
+    controller.trigger("new", [bot, message]);
           
   });
   
   controller.hears(["clear"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
     
     console.log("start");
-    controller.trigger("new", [bot, message, false]);
-          
+    controller.storage.teams.get(message.team_id, function(err, res) {
+      res.users = _.map(res.users, function(user) {
+        return { userId: user.userId, name: user.name };
+      });
+      controller.storage.teams.save(res, function(err, saved) {
+        console.log(saved, "saved this team, all clear!!");
+        bot.reply(message, "thanks, make sure to pickup a new egg!");
+      });
+    });
   });
-  
-
   
   controller.hears("(.*)", ["direct_message"], function(bot, message) {
     controller.storage.teams.get(message.team_id, function(err, res) {
       
       var thisUser = _.findWhere(res.users, { userId: message.user });
       
+      if (!thisUser.tamagotchi_started) return;
+      
+      controller.dataStore(message, "chat");
+      
       console.log("anything");
     
-      // if(!thisUser.gameOver && thisUser.started) {
+      if(!thisUser.gameOver && thisUser.started && thisUser.stage == 0) {
         console.log(message);
         controller.trigger("emoji_message", [bot, message, thisUser.tamagotchi_type]);
-      // }
+      } else {
+        deleteThisMsg(message, res.oauth_token, function() {
+          console.log("no thanks");
+        });
+      }
     });
   });
   

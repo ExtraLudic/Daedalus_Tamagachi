@@ -19,8 +19,11 @@ var bot_options = {
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
 // Mongo is automatically configured when deploying to Heroku
 if (process.env.MONGO_URI) {
-    var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGO_URI});
-    bot_options.storage = mongoStorage;
+  var mongoStorage = require('botkit-storage-mongo')({
+      mongoUri: process.env.MONGO_URI, 
+      tables: ['events']
+    });
+  bot_options.storage = mongoStorage;
 } else {
     bot_options.json_file_store = __dirname + '/.data/db/'; // store user data in a simple JSON format
 }
@@ -39,7 +42,10 @@ webserver.get('/', function(req, res){
     domain: req.get('host'),
     protocol: req.protocol,
     glitch_domain:  process.env.domain,
-    layout: 'layouts/default'
+    layout: 'layouts/default', 
+    data: {
+      clientId: process.env.clientId
+    }
   });
 })
 // Set up a simple storage backend for keeping a record of customers

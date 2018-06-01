@@ -21,8 +21,25 @@ module.exports = function(controller) {
       console.log(event.actions[0].value)
       var type = event.actions[0].value.split(" ")[1];
 
-      controller.trigger("new", [bot, event, true, type]);
+      controller.trigger("new", [bot, event, type]);
 
+    }
+    
+    if (event.actions[0].name.match(/^boardBtn$/)) {
+      controller.storage.teams.get(event.team.id, function(err, team) {
+        // console.log(team.users);
+        var thisUser = _.findWhere(team.users, { userId: event.user });
+        var btnClicked = event.actions[0].value;
+                
+        var opts = {
+          bot: bot, 
+          event: event, 
+          user: thisUser, 
+          btn: btnClicked
+        }
+        
+        controller.trigger("board_button", [opts]);
+      });
     }
     
   });

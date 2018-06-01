@@ -19,10 +19,16 @@ module.exports = function(controller) {
   });
 
   controller.on("emoji_message", function(bot, message, type) {
-    
+
+    var messageUser = message.user ? message.user : message.event.user;
+
+    controller.storage.teams.get(message.team_id, function(err, res) {
+
+      var thisUser = _.findWhere(res.users, { userId: messageUser });
+
       var emojiMessage = 0;
       var thisEmoji;
-    
+
       _.each(message.event.text.split(" "), function(word) {
         console.log(word);
         if (emojis.includes(word)) {
@@ -32,14 +38,13 @@ module.exports = function(controller) {
             emojiMessage = 1;
           } else
             emojiMessage++;
-
         } 
       }); 
-    
+
       if(!thisEmoji)
         thisEmoji = "text";
-    
-      console.log(thisEmoji, emojiMessage);
+
+//       console.log(thisEmoji, emojiMessage);
 
       var amount;
 
@@ -48,33 +53,27 @@ module.exports = function(controller) {
         if (emojiMessage > 1) {
           amount = -1;
         } else {
+          if (type == "turtle" && [":snow_cloud:", ":snowflake:", ":snowman:", ":snowman_without_snow:"].includes(thisEmoji)){
+            controller.trigger("egg_death", [bot, message, thisUser]);
+            return;
+          }
           amount = checkEmojis(thisEmoji, type);
         }
 
       } else {
-        if (type == "turtle") {
-          controller.trigger("death", [bot, message]);
+        if (type == "shrimp") {
+          controller.trigger("egg_death", [bot, message, thisUser]);
           return;
         }
         amount = checkText(type);
       }
+ 
+      // console.log(amount);
 
-      console.log(amount);
+      controller.trigger("warmth", [bot, message, thisUser, amount, thisEmoji]);
 
-      var messageUser = message.user ? message.user : message.event.user;
+    });
 
-      controller.storage.teams.get(message.team_id, function(err, res) {
-
-        // console.log(res.users, message.event);
-
-        var thisUser = _.findWhere(res.users, { userId: messageUser });
-
-        // if(!thisUser.gameOver && thisUser.started) {
-          controller.trigger("warmth", [bot, message, thisUser, amount, thisEmoji]);
-        // }
-
-      });
-      
   });
   
 }
@@ -92,10 +91,6 @@ var checkText = function(type) {
     
     case "turtle":
       score = 2;
-      break;
-      
-    case "shrimp":
-      
       break;
   }
   
@@ -116,14 +111,14 @@ var checkEmojis = function(item, type) {
       break;
       
     case "snake":
-      if (item == ":sun:")
+      if (item == ":sunny:")
         score = 1;
       else  
         score = -3;
       break;
     
     case "lizard":
-      if (item == ":sun:")
+      if (item == ":sunny:")
         score = 1;
       else if (item == ":snowflake:") 
         score = -2;
@@ -135,10 +130,6 @@ var checkEmojis = function(item, type) {
     case "turtle":
       if (item == ":droplet:")
         score = -2;
-      else if (item == ":snow_cloud:" || item == ":snowflake:" || item == ":snowman:" || item == ":snowman_without_snow:") 
-      {
-
-      }
       else 
         score = 1;
       break;

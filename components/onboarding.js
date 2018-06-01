@@ -1,38 +1,64 @@
 const _ = require("underscore");
+const request = require("request");
 var debug = require('debug')('botkit:onboarding');
+const { WebClient } = require('@slack/client');
+
+function isUser(member) {
+  console.log(member.name, member.id);
+  if (member.is_bot || member.name == process.env.botName || member.name == "slackbot")
+    return false;
+  else
+    return true;
+}
 
 module.exports = function(controller) {
 
-    controller.on('onboard', function(bot) {
-
-        debug('Starting an onboarding experience!');
-
+    controller.on('onboard', function(bot, team, state) {
+        
+        console.log('Starting an onboarding experience!', state);
+      
+        // grab creature from first state item
+        var creature = state.split(",")[0];
+        // grab user ID from second state item
+        var userId = state.split(",")[1];
+        var thisUser;
+      
+        // Make sure we have the studio token
         if (controller.config.studio_token) {
-          bot.api.im.open({user: bot.config.createdBy}, function(err, direct_message) {
-            if (err) {
-                debug('Error sending onboarding message:', err);
-            } else {
-              // console.log(direct_message);
-              console.log(bot.identity.team_id); //T8MJ05ZPY
-              // console.log(bot.config.createdBy); //U8LN5CEKU
-              controller.storage.teams.get(bot.identity.team_id, function(err, team) {
-                console.log(team);
-                var thisUser = _.findWhere(team.users, { userId: bot.config.createdBy });
-                console.log(thisUser);
-                controller.studio.get(bot, 'onboarding', bot.config.createdBy, direct_message.channel.id).then(function(convo) {
-                  // console.log(convo.context);
-                  convo.icon_url = "http://vanguardseattle.com/wp-content/uploads/2016/05/egg-emoji-unicode.jpg";
-                  var value = convo.threads.default[0].attachments[0].actions[0].value + " " + thisUser.tamagotchi_type;
-                  
-                  convo.threads.default[0].attachments[0].actions[0].value = value;
-                  
-                  console.log(value, convo.threads.default[0].attachments[0].actions[0].value);
-                  convo.activate();
-                });
+          // open im with user that added this app
+
+          console.log(bot.identity.team_id, state); 
+
+          controller.storage.teams.get(bot.identity.team_id, function(err, team) {
+
+            var web = new WebClient(team.bot.token);
+            // list out users to add to team 
+            // only if team users are empty - sanity check
+            web.users.list({}, function (err, users) {
+
+                team.users = [];
+                console.log(users.members);
+
+                _.each(users.members, function(user) {
+                  if (isUser(user)) {
+                    var user = {
+                      userId: user.id, 
+                      name: user.name
+                    }
+
+                    team.users.push(user);
+                  }
+                }); 
+
+              // save the team
+              controller.storage.teams.save(team, function(err, saved) {
+                console.log(saved);
+
               });
-              
-            }
+
+            });
           });
+              
         } 
     });
 

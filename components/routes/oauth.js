@@ -1,8 +1,16 @@
 var debug = require('debug')('botkit:oauth');
+var request = require("request");
 
 module.exports = function(webserver, controller) {
 
     var handler = {
+        login: function(req, res) {
+          // console.log(req, res);
+          var data = req.params;
+          console.log(data);
+          res.redirect("https://slack.com/oauth/authorize?state=" + data.type + "," + data.player + "&team="+ data.team + "&client_id=" + process.env.clientId + "&scope=bot,users:read");
+
+        },
         oauth: function(req, res) {
             var code = req.query.code;
             var state = req.query.state;
@@ -46,7 +54,7 @@ module.exports = function(webserver, controller) {
                     // by the developer without meddling with the actual oauth route.
 
                     auth.identity = identity;
-                    controller.trigger('oauth:success', [auth]);
+                    controller.trigger('oauth:success', [auth, state]);
 
                     res.cookie('team_id', auth.team_id);
                     res.cookie('bot_user_id', auth.bot.bot_user_id);
@@ -66,6 +74,9 @@ module.exports = function(webserver, controller) {
     // your value should be https://<my custom domain or IP>/oauth
     debug('Configured /oauth url');
     webserver.get('/oauth', handler.oauth);
+  
+    // https://github.com/howdyai/botkit/blob/master/readme-slack.md#custom-auth-flows
+    webserver.get('/login/:type/:player/:team', handler.login);
 
     return handler;
 }

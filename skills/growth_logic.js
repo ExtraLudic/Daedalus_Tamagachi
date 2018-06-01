@@ -23,15 +23,22 @@ module.exports = function(controller) {
         if (vars.text)
           msg = vars.text;
         
-        var emoji = vars.eggEmoji;
-        if(user.hatched) emoji = vars.chickEmoji;
+        var options = {
+          bot: bot, 
+          message: message, 
+          icon: "egg", 
+          user: user, 
+          text: msg + result.msg, 
+          meter: user.warmthMeter
+        }
 
-        say(msg + result.msg, emoji, bot, message, { meter: user.warmthMeter });
+        controller.say(options, function() {
+          cb(user);
+        });
 
       } else 
-        controller.trigger("death", [bot, message, user, result.msg]);
+        controller.trigger("egg_death", [bot, message, user, result.msg]);
 
-      cb(user);
 
     });
     
@@ -52,39 +59,6 @@ module.exports = function(controller) {
         progress[x] = nope;
     }
     
-  }
-  
-  var say = function(text, emoji, bot, message, options) {
-    console.log("bot gonna say", text);
-    // console.log(options);
-    var reply = { text: text, icon_url: emoji, username: "Tamagotchi Puzzle" };
-  
-    if (options) {
-
-      if (options.meter) {
-        reply.text += "\n\n";
-        // console.log(text);
-        for(var y = 0; y < options.meter.length; y++){
-            reply.text += options.meter[y];
-          // console.log(text);
-        }
-      }
-
-      if (options.attachment) {
-        var attachments = options.attachment;
-        reply.attachments = attachments;
-      }
-      
-      if (options.username)
-        reply.username = options.username;
-    }
-        
-    reply.channel = message.channel;
-      
-    reply.username = reply.username + " ";
-    
-    bot.say(reply);
-
   }
   
 };

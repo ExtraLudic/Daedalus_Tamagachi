@@ -3,8 +3,9 @@ var debug = require('debug')('botkit:user_registration');
 module.exports = function(controller) {
 
     /* Handle event caused by a user logging in with oauth */
-    controller.on('oauth:success', function(payload) {
+    controller.on('oauth:success', function(payload, state) {
 
+      console.log(state);
         debug('Got a successful login!', payload);
         if (!payload.identity.team_id) {
             debug('Error: received an oauth response without a team id', payload);
@@ -31,7 +32,7 @@ module.exports = function(controller) {
                 createdBy: payload.identity.user_id,
                 app_token: payload.access_token,
             };
-
+          
             var testbot = controller.spawn(team.bot);
 
             testbot.api.auth.test({}, function(err, bot_auth) {
@@ -54,10 +55,11 @@ module.exports = function(controller) {
                         if (err) {
                             debug('Error: could not save team record:', err);
                         } else {
+                          console.log(testbot, team, state);
                             if (new_team) {
-                                controller.trigger('create_team', [testbot, team]);
+                                controller.trigger('create_team', [testbot, team, state]);
                             } else {
-                                controller.trigger('update_team', [testbot, team]);
+                                controller.trigger('update_team', [testbot, team, state]);
                             }
                         }
                     });
@@ -67,7 +69,7 @@ module.exports = function(controller) {
     });
 
 
-    controller.on('create_team', function(bot, team) {
+    controller.on('create_team', function(bot, team, state) {
 
         debug('Team created:', team);
 
@@ -75,17 +77,17 @@ module.exports = function(controller) {
         controller.trigger('rtm:start', [bot.config]);
 
         // Trigger an event that will cause this team to receive onboarding messages
-        controller.trigger('onboard', [bot, team]);
+        controller.trigger('onboard', [bot, team, state]);
 
     });
 
 
-    controller.on('update_team', function(bot, team) {
+    controller.on('update_team', function(bot, team, state) {
 
         debug('Team updated:', team);
         // Trigger an event that will establish an RTM connection for this bot
         controller.trigger('rtm:start', [bot]);
-        controller.trigger('onboard', [bot, team]);
+        controller.trigger('onboard', [bot, team, state]);
 
     });
 
