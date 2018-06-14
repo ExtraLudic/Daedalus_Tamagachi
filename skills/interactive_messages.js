@@ -14,6 +14,7 @@ module.exports = function(controller) {
     
     console.log(event.actions[0].name, "is the interactive message callback event");
     
+    // Catch for the "Look at egg" button
     if (event.actions[0].name.match(/^say(.*)$/)) {
 
       var reply = event.original_message;
@@ -25,6 +26,7 @@ module.exports = function(controller) {
 
     }
     
+    // Catch for the buttons on the chess board
     if (event.actions[0].name.match(/^boardBtn$/)) {
       controller.storage.teams.get(event.team.id, function(err, team) {
         // console.log(team.users);
