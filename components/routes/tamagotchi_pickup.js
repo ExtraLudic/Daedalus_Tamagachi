@@ -8,13 +8,18 @@ module.exports = function(webserver, controller) {
     var teamId = req.body.team;
     var player = req.body.player;
     var type = req.body.type;
+    
+    console.log(req.body);
                 
     controller.storage.teams.get(teamId, function(err, team) {
       
       var bot = controller.spawn(team.bot);
-      
       var thisUser = _.findWhere(team.users, { userId: player });
       var repeated = _.findWhere(team.users, { tamagotchi_type: type });
+
+      // * If this player doesn't exist on the team for any reason
+      // Add their userId to the users object
+      if (!thisUser) team.users.push({ userId: player });
       
       if (thisUser.tamagotchi_started || repeated) {
         // WHOA let's rethink

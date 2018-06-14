@@ -45,9 +45,9 @@ module.exports = function(controller) {
     
     thisUser.hatched = false;
     
-    thisUser.gameOver = false;
-    thisUser.started = true;
-    thisUser.stage = 0;
+    thisUser.tamagotchi_over = false;
+    thisUser.tamagotchi_started = true;
+    thisUser.tamagotchi_stage = 0;
     
     thisUser.warmth = 50;
     
@@ -109,27 +109,29 @@ module.exports = function(controller) {
     
   });
   
-  
+  // warmth event - checks the warmth of the tamagotchi egg based on input
   controller.on("warmth", function(bot, message, user, amount, input) { 
         
+    // Multiply by 5 for proper percentage
     user.warmth += amount*5;
 
     var vars = {
       input: input
     }
 
+    // Run the warmth logic
     controller.warmthLogic(bot, message, user, vars, function(updated) {
 
-      // console.log(updated, " is the user after the warmth logic" );
+      // Check if user hatched the egg 
       if (updated.hatched && updated.newHatch) {
-        updated.stage = 1;
+        updated.tamagotchi_stage = 1;
         updated.newBoardBtns = true;
       }
       
       saveTeam(bot.config.id, updated, function(savedUser) {
 
         // console.log(saved.stage, " is the stage we just updated");
-        if (savedUser.stage > 0) {
+        if (savedUser.tamagotchi_stage > 0) {
           
           setTimeout(function() {
                         
@@ -142,9 +144,8 @@ module.exports = function(controller) {
             };
             
             controller.say(params, function() {
-              console.log("now that we said that, let's set up the board");
-              
-              controller.trigger("board_setup", [bot, message, savedUser.tamagotchi_type, savedUser.stage]);
+              // Set up the stage 1 board              
+              controller.trigger("board_setup", [bot, message, savedUser.tamagotchi_type, savedUser.tamagotchi_stage]);
               
               var data = {
                 puzzle: savedUser.tamagotchi_type, 
@@ -171,9 +172,9 @@ module.exports = function(controller) {
   
   controller.on("win_state", function(bot, message, user, text) {
     
-    user.gameOver = true;
-    user.won = true;
-    user.started = false;
+    user.tamagotchi_over = true;
+    user.tamagotchi_won = true;
+    user.tamagotchi_started = false;
     
     saveTeam(bot.config.id, user, function(saved) {
     
@@ -211,8 +212,8 @@ module.exports = function(controller) {
   
   controller.on("egg_death", function(bot, message, user, text) {
     
-    user.gameOver = true;
-    user.started = false;
+    user.tamagotchi_over = true;
+    user.tamagotchi_started = false;
     
     saveTeam(bot.config.id, user, function(saved) {
     
@@ -240,8 +241,8 @@ module.exports = function(controller) {
   
   controller.on("creature_death", function(bot, message, user, text) {
     
-    user.gameOver = true;
-    user.started = false;
+    user.tamagotchi_over = true;
+    user.tamagotchi_started = false;
     
     saveTeam(bot.config.id, user, function(saved) {
     
@@ -257,7 +258,7 @@ module.exports = function(controller) {
 
       controller.say(params, function() {
         setTimeout(function() {
-         controller.trigger("board_setup", [bot, message, saved.tamagotchi_type, saved.stage]);
+         controller.trigger("board_setup", [bot, message, saved.tamagotchi_type, saved.tamagotchi_stage]);
         }, 500);
       });
       

@@ -77,13 +77,32 @@ module.exports = function(controller) {
     
     console.log("start");
     controller.storage.teams.get(message.team_id, function(err, res) {
-      res.users = _.map(res.users, function(user) {
-        return { userId: user.userId, name: user.name };
-      });
+    var web = new WebClient(res.bot.token);
+    // list out users to add to team 
+    web.users.list({}, function (err, users) {
+
+      res.users = [];
+
+      _.each(users.members, function(user) {
+        if (controller.isUser(user)) {
+          var user = {
+            userId: user.id, 
+            name: user.name
+          }
+
+          res.users.push(user);
+        }
+      }); 
+
+      // save the team
       controller.storage.teams.save(res, function(err, saved) {
-        console.log(saved, "saved this team, all clear!!");
-        bot.reply(message, "thanks, make sure to pickup a new egg!");
+        console.log(saved);
+      bot.reply(message, "thanks, make sure to pickup a new egg!");
+
       });
+
+    });
+      
     });
   });
   
@@ -96,8 +115,8 @@ module.exports = function(controller) {
         if (user.userId == message.user) {
           user.tamagotchi_type = message.text.split(" ")[1];
           user.tamagotchi_started = true;
-          user.stage = 0;
-          user.gameOver = false;
+          user.tamagotchi_stage = 0;
+          user.tamagotchi_over = false;
         }
         return user;
       });
@@ -121,7 +140,7 @@ module.exports = function(controller) {
       
       console.log("anything");
     
-      if(!thisUser.gameOver && thisUser.started && thisUser.stage == 0) {
+      if(!thisUser.tamagotchi_over && thisUser.tamagotchi_started && thisUser.tamagotchi_stage == 0) {
         console.log(message);
         controller.trigger("emoji_message", [bot, message, thisUser.tamagotchi_type]);
       } else {

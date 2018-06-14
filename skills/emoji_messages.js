@@ -7,12 +7,11 @@ module.exports = function(controller) {
   
   // Emoji request 
   request("https://raw.githubusercontent.com/iamcal/emoji-data/master/emoji.json", function(err, res, body) {
+    // Get each emoji and add ":" to start/end for slack syntax
+    // Store in variable emojis for quick access
     if (!err && res.statusCode == 200) {
-       var importedJSON = JSON.parse(body);
-      // console.log(importedJSON);
-      
+       var importedJSON = JSON.parse(body);      
       _.each(importedJSON, function(item) {
-        // console.log(item.short_name);
         emojis.push(":" + item.short_name + ":");
       });
     }
@@ -29,8 +28,10 @@ module.exports = function(controller) {
       var emojiMessage = 0;
       var thisEmoji;
 
+      // Split the message by spaces and iterate
       _.each(message.event.text.split(" "), function(word) {
-        console.log(word);
+        // If the word is an emoji
+        // Set thisEmoji to the word 
         if (emojis.includes(word)) {
           console.log("it's an emoji!");
           if (!thisEmoji || thisEmoji == word) {
@@ -44,32 +45,36 @@ module.exports = function(controller) {
       if(!thisEmoji)
         thisEmoji = "text";
 
-//       console.log(thisEmoji, emojiMessage);
-
       var amount;
 
-      if (emojiMessage > 0) {
+      if (emojiMessage > 0) { // Emoji input
 
+        // Any combo of multiple emojis results in -1
         if (emojiMessage > 1) {
           amount = -1;
-        } else {
+        } else { 
+          // Some tamagotchis are frozen by certain emojis
           if (type == "turtle" && [":snow_cloud:", ":snowflake:", ":snowman:", ":snowman_without_snow:"].includes(thisEmoji)){
             controller.trigger("egg_death", [bot, message, thisUser, "You froze me to death!\n"]);
             return;
           }
+          // If not dead, check the emoji's effect
           amount = checkEmojis(thisEmoji, type);
         }
 
-      } else {
+      } else { // Text Input
+        
+        // Shrimp are killed by text input
         if (type == "shrimp") {
           controller.trigger("egg_death", [bot, message, thisUser]);
           return;
         }
+        
+        // If not dead, check text effect
         amount = checkText(type);
       }
  
-      // console.log(amount);
-
+      // Send the effect to the warmth event
       controller.trigger("warmth", [bot, message, thisUser, amount, thisEmoji]);
 
     });
@@ -78,6 +83,7 @@ module.exports = function(controller) {
   
 }
 
+// Check text effect on different tamagotchis
 var checkText = function(type) {
   var score = 0;
   switch (type) {
@@ -97,6 +103,7 @@ var checkText = function(type) {
   return score;
 }
 
+// Check emojis effect on different tamagotchis
 var checkEmojis = function(item, type) {
   var score = 0;
     

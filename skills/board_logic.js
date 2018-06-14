@@ -37,7 +37,7 @@ module.exports = function(controller) {
         message.event = "death";
         message.newPos = newPos;
         message.oldPos = currentPos;
-        message.foodLeft = user.food["pos_" + user.stage];
+        message.foodLeft = user.food["pos_" + user.tamagotchi_stage];
         controller.dataStore(message, "button");
         
         controller.trigger("board_disable", [bot, message]);
@@ -144,27 +144,27 @@ module.exports = function(controller) {
     var full = false;
     var fed = false;
 
-    _.each(user.food["pos_" + user.stage], function(pos) {
+    _.each(user.food["pos_" + user.tamagotchi_stage], function(pos) {
       
       if (newPos == pos) {
-        user.food["pos_" + user.stage].splice(user.food["pos_" + user.stage].indexOf(newPos), 1);
+        user.food["pos_" + user.tamagotchi_stage].splice(user.food["pos_" + user.tamagotchi_stage].indexOf(newPos), 1);
         fed = true;
         console.log("we picked up food");
 
-        if (user.food["pos_" + user.stage].length < 1) {
+        if (user.food["pos_" + user.tamagotchi_stage].length < 1) {
           full = true;
-          if (user.stage == 1) {
-            user.stage = 2;
+          if (user.tamagotchi_stage == 1) {
+            user.tamagotchi_stage = 2;
             user.newBoardBtns = true;
-            controller.getEmoji(user.tamagotchi_type, user.stage, function(emoji) {
+            controller.getEmoji(user.tamagotchi_type, user.tamagotchi_stage, function(emoji) {
               user.creature = emoji;
             });
             message.event = "food";
             message.newPos = newPos;
             message.oldPos = options.oldPos;
-            message.foodLeft = message.foodLeft = user.food["pos_" + user.stage];
+            message.foodLeft = message.foodLeft = user.food["pos_" + user.tamagotchi_stage];
             controller.dataStore(message, "button");
-          } else if (user.stage == 2) {
+          } else if (user.tamagotchi_stage == 2) {
             console.log("we won!");
             var data = {
               puzzle: user.tamagotchi_type, 
@@ -211,7 +211,7 @@ module.exports = function(controller) {
 
               setTimeout(function() {
                 controller.trigger("board_disable", [bot, updated]);
-                controller.trigger("board_setup", [bot, message, user.tamagotchi_type, user.stage]);
+                controller.trigger("board_setup", [bot, message, user.tamagotchi_type, user.tamagotchi_stage]);
                 
               }, 1000);
             });
@@ -225,7 +225,7 @@ module.exports = function(controller) {
         message.event = "movement";
         message.newPos = newPos;
         message.oldPos = options.oldPos;
-        message.foodLeft = user.food["pos_" + user.stage];
+        message.foodLeft = user.food["pos_" + user.tamagotchi_stage];
         controller.dataStore(message, "button");
     }
 
@@ -252,7 +252,7 @@ var checkRules = function(user, btn, pos) {
   var newPos;
   switch(btn) {
     case "A":
-      if (user.stage == 1) {
+      if (user.tamagotchi_stage == 1) {
         newPos = pos - 8*4;
         if (newPos < 0)
           return "death";          
@@ -263,7 +263,7 @@ var checkRules = function(user, btn, pos) {
       break;
 
     case "B":
-      if (user.stage == 1) {
+      if (user.tamagotchi_stage == 1) {
         if (pos % 8 == 0)
           return "death";
         
@@ -276,7 +276,7 @@ var checkRules = function(user, btn, pos) {
       break;
       
     case "C":
-      if (user.stage == 1) {
+      if (user.tamagotchi_stage == 1) {
         newPos = pos + (pos%8 + 1);
         
         if ((newPos >= Math.ceil(pos/8) * 8 && pos != Math.ceil(pos/8) * 8) || newPos > 63)
@@ -290,7 +290,7 @@ var checkRules = function(user, btn, pos) {
       break;
       
     case "D":
-      if (user.stage == 1) {
+      if (user.tamagotchi_stage == 1) {
         // console.log(pos, "is where you started");
         newPos = pos + 8;
        

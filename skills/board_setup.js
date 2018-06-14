@@ -71,7 +71,7 @@ module.exports = function(controller) {
         controller.getIcon(thisUser.creature, function(url) {
           
           thread.icon_url = url;
-          thread.username = controller.getUsername(thisUser.tamagotchi_type, thisUser.stage);
+          thread.username = controller.getUsername(thisUser.tamagotchi_type, thisUser.tamagotchi_stage);
           
           controller.storage.teams.save(team, function(err, saved) {
             convo.activate();

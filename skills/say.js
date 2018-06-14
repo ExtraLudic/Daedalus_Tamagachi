@@ -5,7 +5,7 @@ module.exports = function(controller) {
     var message = options.message;
     var user = options.user;
     
-    var username = controller.getUsername(user.tamagotchi_type, user.stage);
+    var username = controller.getUsername(user.tamagotchi_type, user.tamagotchi_stage);
 
     controller.getIcon(options.icon, function(url) {
 
