@@ -94,9 +94,9 @@ function setMsgBtns(attachments, thisUser) {
   // store ALL buttons from ALL attachments
   var msg_btns = attachments[0].actions;
 
-  if (thisUser.stage == 2) msg_btns = msg_btns.concat(attachments[1].actions);
+  if (thisUser.tamagotchi_stage == 2) msg_btns = msg_btns.concat(attachments[1].actions);
 
-  var saved_btns = thisUser["board_btns_" + thisUser.stage];
+  var saved_btns = thisUser["board_btns_" + thisUser.tamagotchi_stage];
 
   if (saved_btns) btn_emojis = btn_emojis.concat(saved_btns);
 
@@ -140,10 +140,10 @@ function setMsgBtns(attachments, thisUser) {
 
   attachments[0].actions = _.first(msg_btns, 4);
   
-  if (thisUser.stage == 2) attachments[1].actions = _.last(msg_btns, 4);
+  if (thisUser.tamagotchi_stage == 2) attachments[1].actions = _.last(msg_btns, 4);
 
   if (!saved_btns || saved_btns.length < btn_emojis.length) 
-    thisUser["board_btns_" + thisUser.stage] = btn_emojis;
+    thisUser["board_btns_" + thisUser.tamagotchi_stage] = btn_emojis;
   
   return { attachments: attachments, thisUser: thisUser };
 
