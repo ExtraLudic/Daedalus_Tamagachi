@@ -43,7 +43,7 @@ module.exports = function(controller) {
   }
   
   var getChickenStatus = function(warmth, input) {
-    var statusMsg;
+    var statusMsg = "";
     if (!input) {
       statusMsg = 'My current warmth is at ' + warmth + '%!\n';
       return { msg: statusMsg, action: action };
@@ -53,7 +53,7 @@ module.exports = function(controller) {
       statusMsg = "I froze to death. Try again?\n";
       action = "death";
     } else if (warmth > 100) {
-      statusMsg = "Oh no, you cooked me! Try again?";
+      statusMsg = "Oh no, you cooked me! Try again?\n";
       action = "death";
     }
     
@@ -61,6 +61,7 @@ module.exports = function(controller) {
     
     if(warmth == 85){
       action = "hatched";
+      statusMsg = "Ahh, perfect!\n";
     } 
     
     if ([":fire:", ":snowflake:"].includes(input)) {
@@ -70,7 +71,7 @@ module.exports = function(controller) {
         statusMsg = hot ? "Ouch! Ouch! Too hot!\n" : "Still too hot!\n"; 
       } else if(warmth <= 80 && warmth >= 70){
         statusMsg = hot ? "Oh boy, getting close!\n" : "This is a little too cold, can you warm me up please?\n";
-      } else if(warmth < 65 && warmth >= 55){
+      } else if(warmth <= 65 && warmth >= 55){
         statusMsg = hot ? "Thanks! Getting toasty! A little warmer please\n" : "No! I need to warm up now!\n";
       } else if(warmth <= 50 && warmth >= 20){
         statusMsg = hot ? "Oh thank goodness! I needed that! A little warmer please!\n" : "Oh no, you’re freezing me!\n";
@@ -89,17 +90,17 @@ module.exports = function(controller) {
   }
   
   var getSnakeStatus = function(warmth, input) {
-    var statusMsg;
+    var statusMsg = "";
     if (!input) {
       statusMsg = 'My current warmth is at ' + warmth + '%!\n';
       return { msg: statusMsg, action: action };
     }
     
     if (warmth <= 10) {
-      statusMsg += "I froze to death. Try again?\n";
+      statusMsg = "I froze to death. Try again?\n";
       action = "death";
     } else if (warmth >= 95) {
-      statusMsg += "Oh no, you cooked me! Try again?";
+      statusMsg = "Oh no, you cooked me! Try again?\n";
       action = "death";
     }
     
@@ -107,14 +108,15 @@ module.exports = function(controller) {
 
     if(warmth == 75){
       action = "hatched";
+      statusMsg = "Ahh, perfect!\n";
     } 
     
     if (input == ":sunny:") {
-      if (warmth <= 100 && warmth >= 90) {
+      if (warmth <= 100 && warmth >= 80) {
         statusMsg = "Ouch! Ouch! Too hot!\n"; 
-      } else if(warmth < 60 && warmth >= 40){
+      } else if(warmth <= 70 && warmth >= 40){
         statusMsg = "Thanks! Getting toasty! A little warmer please\n";
-      } else if(warmth < 50 && warmth >= 20){
+      } else if(warmth < 40){
         statusMsg = "Oh thank goodness! I needed that! A little warmer please!\n";
       }
     } else if (input == "text") {
@@ -130,7 +132,7 @@ module.exports = function(controller) {
   }
   
   var getLizardStatus = function(warmth, input) {
-    var statusMsg;
+    var statusMsg = "";
     if (!input) {
       statusMsg = 'My current warmth is at ' + warmth + '%!\n';
       return { msg: statusMsg, action: action };
@@ -148,6 +150,7 @@ module.exports = function(controller) {
 
     if(warmth == 30){
       action = "hatched";
+      statusMsg = "Ahh, perfect!\n";
     } 
     
     if ([":snow_cloud:", ":snowflake:", ":sunny:"].includes(input)) {
@@ -173,7 +176,7 @@ module.exports = function(controller) {
   }
   
   var getTurtleStatus = function(warmth, input) {
-    var statusMsg;
+    var statusMsg = "";
     
     if (!input) {
       statusMsg = 'My current warmth is at ' + warmth + '%!\n';
@@ -195,16 +198,19 @@ module.exports = function(controller) {
     
     if(warmth == 40){
       action = "hatched";
+      statusMsg = "Ahh, perfect!\n";
     } 
       
     if (input == ":droplet:") {
       if(warmth >= 45 && warmth <= 75){
         statusMsg = "Oh thank you! That’s much better! Please cool me off and hatch me.\n";
+      } else if (warmth < 40) {
+        statusMsg = "A bit too cold now!\n";
       }
     } else if (input == "text") {
       statusMsg = "Ack, I don’t understand! It’s too dry in here!\n";
     } else {
-      if(warmth >= 40 && warmth <= 75){
+      if(warmth > 40 && warmth <= 75){
         statusMsg = "I’m drying out!\n";
       }
     }
@@ -215,7 +221,7 @@ module.exports = function(controller) {
   }
   
   var getShrimpStatus = function(warmth, input) {
-    var statusMsg;
+    var statusMsg = "";
     
     if (!input) {
       statusMsg = 'My current warmth is at ' + warmth + '%!\n';
@@ -230,6 +236,7 @@ module.exports = function(controller) {
 
     if(warmth > 100){
       action = "hatched";
+      statusMsg = "Ahh, perfect!\n";
     } 
 
     if (input == ":fire:") {
