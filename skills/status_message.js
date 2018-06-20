@@ -250,7 +250,7 @@ module.exports = function(controller) {
     } else if (input == "text") {
       statusMsg = "That’s not what I need! You’re freezing me! Help!\n";
     } else {
-      statusMsg = "I don’t understand. You just bored me to death.\n";
+      statusMsg = "I don’t understand. I died.\n";
       action = "death";
     }
     
