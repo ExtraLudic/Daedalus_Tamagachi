@@ -66,7 +66,7 @@ module.exports = function(controller) {
         
         // Shrimp are killed by text input
         if (type == "shrimp") {
-          controller.trigger("egg_death", [bot, message, thisUser]);
+          controller.trigger("egg_death", [bot, message, thisUser, "I don't understand. I died."]);
           return;
         }
         
@@ -97,6 +97,10 @@ var checkText = function(type) {
     
     case "turtle":
       score = 2;
+      break;
+      
+    case "lizard": 
+      score = 5;
       break;
   }
   
@@ -134,12 +138,14 @@ var checkEmojis = function(item, type) {
       else 
         score = 5;
       break;
+      
     case "turtle":
       if (item == ":droplet:")
         score = -2;
       else 
         score = 1;
       break;
+      
     case "shrimp":
       if (item == ":fire:")
         score = 2;

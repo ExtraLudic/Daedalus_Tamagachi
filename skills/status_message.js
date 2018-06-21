@@ -155,9 +155,9 @@ module.exports = function(controller) {
     
     if ([":snow_cloud:", ":snowflake:", ":sunny:"].includes(input)) {
       if(warmth <= 90 && warmth >= 65){
-        statusMsg = "A little cooler please!\n";
+        statusMsg = "It's too hot!!!!\n";
       } else if(warmth <= 60 && warmth >= 45){
-        statusMsg = "Thanks! Getting better! A little cooler please...\n";
+        statusMsg = "A little cooler please...\n";
       } else if(warmth <= 40 && warmth >= 35){
         statusMsg = "Oh boy, getting close!\n";
       } else if(warmth <= 25 && warmth >= 5){
@@ -247,10 +247,8 @@ module.exports = function(controller) {
       } else if(warmth >= 35 && warmth <= 60){
         statusMsg = "Oh thank goodness! I needed that! Make me hotter, please!\n";
       }
-    } else if (input == "text") {
-      statusMsg = "That’s not what I need! You’re freezing me! Help!\n";
     } else {
-      statusMsg = "I don’t understand. I died.\n";
+      statusMsg = "That's not what I need. I died.\n";
       action = "death";
     }
     
