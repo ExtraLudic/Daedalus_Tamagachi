@@ -5,6 +5,7 @@ module.exports = function(controller) {
   controller.dataStore = function(event, type, opt) {
     
     var ObjectID = require('bson').ObjectID;
+    var storage = type == "button" ? "events" : "chat";
         
     var dataEvent = {
       id: new ObjectID(),
@@ -42,7 +43,7 @@ module.exports = function(controller) {
     
     console.log(dataEvent);
     
-    controller.storage.events.save(dataEvent, function(err, saved) {
+    controller.storage[storage].save(dataEvent, function(err, saved) {
       console.log(err, saved, "SAVED!!");
     });
     

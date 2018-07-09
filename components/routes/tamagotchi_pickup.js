@@ -19,7 +19,10 @@ module.exports = function(webserver, controller) {
 
       // * If this player doesn't exist on the team for any reason
       // Add their userId to the users object
-      if (!thisUser) team.users.push({ userId: player });
+      if (!thisUser) {
+        thisUser = { userId: player };
+        team.users.push(thisUser);
+      }
       
       if (thisUser.tamagotchi_started || repeated) {
         // WHOA let's rethink
@@ -30,6 +33,9 @@ module.exports = function(webserver, controller) {
         }
 
         request.post({ url: 'https://escape-room-' + process.env.environment + '.glitch.me/tamagotchi_error', form: data }, function(err, req, body) {
+          controller.storage.teams.save(team, function(err, saved) {
+            console.log(err, saved);
+          });
 
         });
 

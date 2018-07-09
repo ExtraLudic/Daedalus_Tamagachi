@@ -21,7 +21,7 @@ var bot_options = {
 if (process.env.MONGO_URI) {
     var mongoStorage = require('botkit-storage-mongo')({
       mongoUri: process.env.MONGO_URI, 
-      tables: ['events']
+      tables: ['events', 'chat']
     });
     bot_options.storage = mongoStorage;
 } else {
