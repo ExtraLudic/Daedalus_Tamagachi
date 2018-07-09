@@ -19,7 +19,7 @@ module.exports = function(controller) {
 
       var reply = event.original_message;
 
-      console.log(event.actions[0].value)
+      console.log(event.actions[0].value);
       var type = event.actions[0].value.split(" ")[1];
 
       controller.trigger("new", [bot, event, type]);
