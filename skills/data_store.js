@@ -40,9 +40,7 @@ module.exports = function(controller) {
       dataEvent.message = event.text;
       dataEvent.type = event.type;
     } 
-    
-    console.log(dataEvent);
-    
+        
     controller.storage[storage].save(dataEvent, function(err, saved) {
       console.log(err, saved, "SAVED!!");
     });
