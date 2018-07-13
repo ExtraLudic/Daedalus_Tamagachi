@@ -160,7 +160,7 @@ module.exports = function(controller) {
                 codeType: "tamagotchi_hatch"
               };
 
-              request.post({ url: 'https://escape-room-' + process.env.environment + '.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
+              request.post({ url: process.env.game_domain + '/tamagotchi_gamelog', form: data }, function(err, req, body) {
 
               });
 
