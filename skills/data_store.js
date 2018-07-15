@@ -34,7 +34,7 @@ module.exports = function(controller) {
         dataEvent.oldPos = event.oldPos;
         dataEvent.foodLeft = event.foodLeft;
         dataEvent.event = event.event;
-
+        dataEvent.btnRule = event.buttonAction;
       }
     } else if (type == "chat") {
       dataEvent.message = event.text;
