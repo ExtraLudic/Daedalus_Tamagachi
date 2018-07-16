@@ -31,7 +31,7 @@ module.exports = function(controller) {
 
       var newPos = checkRules(user, btn, currentPos);
 
-      message.buttonAction = controller.buttonRules(btn);
+      message.buttonAction = controller.buttonRules[user.tamagotchi_stage][btn];
       // console.log(newPos, "is the new position");
 
       if (newPos == "death") {
