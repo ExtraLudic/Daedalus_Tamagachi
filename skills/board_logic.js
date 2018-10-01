@@ -1,6 +1,25 @@
 const _ = require("underscore");
 const request = require("request");
 
+const buttonRules = {
+  1: {
+    A: "Move up 4 spaces",
+    B: "Move left 1 space",
+    C: "Double position to the right",
+    D: "Move diagonal down+left"
+  },
+  2: {
+    A: "Move to space 37",
+    B: "Move to space 27",
+    C: "Move to space 28",
+    D: "Move to space 38",
+    E: "Move up 4 spaces",
+    F: "Move down 4 spaces",
+    G: "Move left 4 spaces",
+    H: "Move right 4 spaces"
+  }
+}
+
 var onboard_text = "Use the buttons to get me to the food! If you move me off the board I will die and you will have to start over. When I get to the food, I’ll evolve!\n";
 
 module.exports = function(controller) {
@@ -31,7 +50,7 @@ module.exports = function(controller) {
 
       var newPos = checkRules(user, btn, currentPos);
 
-      message.buttonAction = controller.buttonRules[user.tamagotchi_stage][btn];
+      message.buttonAction = buttonRules[user.tamagotchi_stage][btn];
       // console.log(newPos, "is the new position");
 
       if (newPos == "death") {

@@ -51,6 +51,7 @@ module.exports = function(controller) {
   // Hears Functions
   controller.hears(["return"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
 
+    if (process.env.environment != 'dev') return;
     controller.storage.teams.get(message.team_id, function(err, res) {
       res.users = _.map(res.users, function(user) {
         if (user.userId == message.user) {
@@ -69,6 +70,7 @@ module.exports = function(controller) {
   controller.hears(["restart", "start"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
 
     console.log("start");
+    if (process.env.environment != 'dev') return;
     controller.trigger("new", [bot, message]);
 
   });
@@ -76,6 +78,8 @@ module.exports = function(controller) {
   controller.hears(["clear"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
 
     console.log("start");
+
+    if (process.env.environment != 'dev') return;
     controller.storage.teams.get(message.team_id, function(err, res) {
     var web = new WebClient(res.bot.token);
     // list out users to add to team
@@ -108,6 +112,8 @@ module.exports = function(controller) {
 
   controller.hears("new (.*)", ["direct_message"], function(bot,message) {
 
+    if (process.env.environment != 'dev') return;
+
     if (!["chicken", "shrimp", "snake", "turtle", "lizard"].includes(message.text.split(" ")[1])) return;
 
     controller.storage.teams.get(message.team_id, function(err, res) {
@@ -135,7 +141,7 @@ module.exports = function(controller) {
       var thisUser = _.findWhere(res.users, { userId: message.user });
 
       if (!thisUser.tamagotchi_started || !thisUser.tamagotchi_type) return;
-            
+
       console.log("anything");
 
       if(!thisUser.tamagotchi_over && thisUser.tamagotchi_started && thisUser.tamagotchi_stage == 0) {
