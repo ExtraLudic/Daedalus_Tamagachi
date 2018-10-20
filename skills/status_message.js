@@ -6,8 +6,8 @@ module.exports = function(controller) {
   
   controller.getStatus = function(type, int, input, callback) {
     
-    console.log(type, int);
-    console.log(input);
+    console.log(`the ${type} tamagotchi has ${int} warmth`);
+    console.log(input, " is the input from the player");
     
     action = "";
     statusMsg = "";
@@ -35,9 +35,7 @@ module.exports = function(controller) {
         status = getShrimpStatus(int, input);
         break;
     }
-    
-    console.log(status);
-    
+        
     callback(status);
     
   }

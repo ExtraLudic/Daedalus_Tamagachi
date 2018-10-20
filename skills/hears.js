@@ -67,8 +67,8 @@ module.exports = function(controller) {
 
   });
 
+  controller.hears(["restart"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
 
-  controller.hears(["restart", "start"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
     console.log("start");
     if (process.env.environment != 'dev') return;
     controller.trigger("new", [bot, message]);
@@ -77,15 +77,20 @@ module.exports = function(controller) {
 
   controller.hears(["clear_fgh_secret"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
 
-    console.log("start");
+    // console.log("start");
 
     if (message.match[0] != "clear_fgh_secret") return;
-    controller.storage.teams.get(message.team_id, function(err, res) {
-      var web = new WebClient(res.bot.token);
+    
+    controller.store.getTeam(message.team_id)
+    .then(team => {
+      
+      console.log("got team: ", team);
+      
+      var web = new WebClient(team.bot.token);
       // list out users to add to team
       web.users.list({}, function (err, users) {
 
-        res.users = [];
+        team.users = [];
 
         _.each(users.members, function(user) {
           if (controller.isUser(user)) {
@@ -94,20 +99,17 @@ module.exports = function(controller) {
               name: user.name
             }
 
-            res.users.push(user);
+            team.users.push(user);
           }
         });
-
-        // save the team
-        controller.storage.teams.save(res, function(err, saved) {
-          console.log(saved);
+        
+        controller.store.teams[team.id] = team
         bot.reply(message, "thanks, make sure to pickup a new egg!");
-
       });
+      
+    })
+    .catch(err => controller.logger.error(err))
 
-    });
-
-    });
   });
 
   controller.hears("new (.*)", ["direct_message"], function(bot,message) {
@@ -136,23 +138,24 @@ module.exports = function(controller) {
   });
 
   controller.hears("(.*)", ["direct_message"], function(bot, message) {
-    controller.storage.teams.get(message.team_id, function(err, res) {
+    
+    controller.store.getTeam(message.team_id)
+    .then(team => {
 
-      var thisUser = _.findWhere(res.users, { userId: message.user });
-
-      if (!thisUser.tamagotchi_started || !thisUser.tamagotchi_type) return;
-
-      console.log("anything");
+      const thisUser = _.findWhere(team.users, { userId: message.user });
+      console.log(`${thisUser.name} just sent the ${thisUser.tamagotchi_type} tamagotchi "${message.text}"`);
+      console.log(thisUser, " is all the user's data")
 
       if(!thisUser.tamagotchi_over && thisUser.tamagotchi_started && thisUser.tamagotchi_stage == 0) {
-        console.log(message);
         controller.trigger("emoji_message", [bot, message, thisUser.tamagotchi_type]);
       } else {
-        deleteThisMsg(message, res.oauth_token, function() {
-          console.log("no thanks");
+        deleteThisMsg(message, team.oauth_token, function() {
+          // console.log("no thanks");
         });
       }
-    });
+      
+    })
+    .catch(err => controller.logger.error(err));
   });
 
 

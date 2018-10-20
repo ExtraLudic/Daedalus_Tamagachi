@@ -33,7 +33,7 @@ module.exports = function(controller) {
     var reply = message.original_message;
 
     controller.storage.teams.get(message.team.id, function(err, team) {
-      // console.log(userIcon, user.board);
+      console.log(user, " is the user who's board we are updating" );
       // check current user position
       var currentPos = user.board.indexOf(user.creature);
       if (currentPos < 0) currentPos = user.board.indexOf(user.creature + "\n");
@@ -82,40 +82,38 @@ module.exports = function(controller) {
         else
           return u;
       });
+      
+      controller.store.teams[team.id] = team
+      
+      var text = "";
 
-      controller.storage.teams.save(team, function(err, saved) {
+      for (var x = 0; x <= user.board.length; x++) {
+        var tile = user.board[x];
 
-        var text = "";
+        if (tile)
+          text += tile;
+      };
 
-        for (var x = 0; x <= user.board.length; x++) {
-          var tile = user.board[x];
+      bot.api.chat.update({
+        channel: message.channel,
+        ts: reply.ts,
+        text: onboard_text + text,
+        attachments: reply.attachments
+      }, function(err, updated) {
 
-          if (tile)
-            text += tile;
-        };
+        console.log(updated, " we updated this baord");
 
-        bot.api.chat.update({
-          channel: message.channel,
-          ts: reply.ts,
-          text: onboard_text + text,
-          attachments: reply.attachments
-        }, function(err, updated) {
+        var opt = {
+          bot: bot,
+          message: message,
+          updated: updated,
+          user: user,
+          team: team,
+          newPos: newPos,
+          oldPos: currentPos
+        }
 
-          console.log(updated, " we updated this baord");
-
-          var opt = {
-            bot: bot,
-            message: message,
-            updated: updated,
-            user: user,
-            team: saved,
-            newPos: newPos,
-            oldPos: currentPos
-          }
-
-          controller.trigger("food_pickup_check", [opt])
-
-        });
+        controller.trigger("food_pickup_check", [opt])
 
       });
     });
@@ -214,31 +212,31 @@ module.exports = function(controller) {
           else
             return u;
         });
+        
+        controller.store.teams[saved.id] = saved
+        
+        if (full) {
 
-        controller.storage.teams.save(saved, function(err, updatedTeam) {
+          controller.getIcon(user.creature, function(url) {
+            var name = user.creature.replace(/:/g, "").replace(/_/g, " ");
+            name = name.charAt(0).toUpperCase() + name.slice(1);
 
-          if (full) {
-
-            controller.getIcon(user.creature, function(url) {
-              var name = user.creature.replace(/:/g, "").replace(/_/g, " ");
-              name = name.charAt(0).toUpperCase() + name.slice(1);
-
-              console.log(name, " is the name of the bot!!!!");
-              bot.reply(message,{
-                text: "Wow, nice work! I'm full and I've evolved into a hungrier creature now!",
-                username: name,
-                icon_url: url
-              });
-
-              setTimeout(function() {
-                controller.trigger("board_disable", [bot, updated]);
-                controller.trigger("board_setup", [bot, message, user.tamagotchi_type, user.tamagotchi_stage]);
-
-              }, 1000);
+            console.log(name, " is the name of the bot!!!!");
+            bot.reply(message,{
+              text: "Wow, nice work! I'm full and I've evolved into a hungrier creature now!",
+              username: name,
+              icon_url: url
             });
 
-          }
-        });
+            setTimeout(function() {
+              controller.trigger("board_disable", [bot, updated]);
+              controller.trigger("board_setup", [bot, message, user.tamagotchi_type, user.tamagotchi_stage]);
+
+            }, 1000);
+          });
+
+        }
+
       }
     });
 

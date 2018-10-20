@@ -14,10 +14,11 @@ function isUser(member) {
 module.exports = function(webserver, controller) {
 
   webserver.get("/check/:team", function(req, res) {
-    console.log(req.params.team);
+    console.log(req.params.team, " is the team we are checking for");
         
     
-    controller.storage.teams.get(req.params.team, function(err, team) {
+    controller.store.getTeam(req.params.team)
+    .then(team => {
       
       if (!team) {
         res.send({ grabbed: [] });
@@ -36,8 +37,9 @@ module.exports = function(webserver, controller) {
       console.log(grabbed);
       
       res.send({ grabbed: grabbed });
-
-    });
+      
+    })
+    .catch(err => controller.logger.error(err))
     
   });
   

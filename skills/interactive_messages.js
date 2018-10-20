@@ -28,8 +28,10 @@ module.exports = function(controller) {
     
     // Catch for the buttons on the chess board
     if (event.actions[0].name.match(/^boardBtn$/)) {
-      controller.storage.teams.get(event.team.id, function(err, team) {
-        // console.log(team.users);
+      
+      controller.store.getTeam(event.team.id)
+      .then(team => {
+        
         var thisUser = _.findWhere(team.users, { userId: event.user });
         var btnClicked = event.actions[0].value;
                 
@@ -41,7 +43,8 @@ module.exports = function(controller) {
         }
         
         controller.trigger("board_button", [opts]);
-      });
+        
+      }).catch(err => controller.logger.error(err))
     }
     
   });
