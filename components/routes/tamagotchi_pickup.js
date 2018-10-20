@@ -2,40 +2,48 @@ const _ = require("underscore");
 const request = require('request');
 
 module.exports = function(webserver, controller) {
-  
+
   webserver.post("/pickup", function(req, res) {
-    
+
     var teamId = req.body.team;
     var player = req.body.player;
     var type = req.body.type;
-    
+
     console.log(req.body);
-                
+
     controller.storage.teams.get(teamId, function(err, team) {
-      
+
       var bot = controller.spawn(team.bot);
       var thisUser = _.findWhere(team.users, { userId: player });
       var repeated = _.findWhere(team.users, { tamagotchi_type: type });
 
       // * If this player doesn't exist on the team for any reason
       // Add their userId to the users object
-      if (!thisUser) team.users.push({ userId: player });
+      if (!thisUser) {
+        thisUser = { userId: player };
+        team.users.push(thisUser);
+      }
       
-      if (thisUser.tamagotchi_started || repeated) {
+      const finished = thisUser.tamagotchi_over || thisUser.tamagotchi_won
+
+      if (finished || thisUser.tamagotchi_started || repeated) {
         // WHOA let's rethink
         var data = {
-          thread: thisUser.tamagotchi_type ? "holding" : "claimed", 
-          user: player, 
+          thread: thisUser.tamagotchi_type ? "holding" : "claimed",
+          user: player,
           team: team.id
         }
 
-        request.post({ url: 'https://escape-room-' + process.env.environment + '.glitch.me/tamagotchi_error', form: data }, function(err, req, body) {
+        request.post({ url: process.env.game_domain + '/tamagotchi_error', form: data }, function(err, req, body) {
+          controller.storage.teams.save(team, function(err, saved) {
+            console.log(err, saved);
+          });
 
         });
 
       } else {
         var thisUser;
-        // find this user 
+        // find this user
         var updated = _.map(team.users, function(user) {
           if (user.userId == player) {
             user.tamagotchi_type = type;
@@ -52,14 +60,14 @@ module.exports = function(webserver, controller) {
           console.log("someone grabbed an egg so we saved their type!", saved);
 
           var data = {
-            puzzle: type, 
-            user: thisUser, 
-            team: saved, 
+            puzzle: type,
+            user: thisUser,
+            team: saved,
             codeType: "tamagotchi_egg"
           };
 
           // post in the gamelog
-          request.post({ url: 'https://escape-room-' + process.env.environment + '.glitch.me/tamagotchi_gamelog', form: data }, function(err, req, body) {
+          request.post({ url: process.env.game_domain + '/tamagotchi_gamelog', form: data }, function(err, req, body) {
             bot.api.im.open({ user: data.user.userId }, function(err, direct_message) {
               controller.studio.get(bot, 'onboarding', player, direct_message.channel.id).then(function(convo) {
 
@@ -73,14 +81,14 @@ module.exports = function(webserver, controller) {
               });
             });
           });
-          
+
         });
 
       }
 
-      
+
     });
-    
+
   });
-  
+
 }
