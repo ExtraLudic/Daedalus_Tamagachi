@@ -20,20 +20,21 @@ module.exports = function(controller) {
   controller.on("emoji_message", function(bot, message, type) {
 
     var messageUser = message.user ? message.user : message.event.user;
+    
+    controller.store.getTeam(message.team_id)
+    .then(team => {
+      
+      let thisUser = _.findWhere(team.users, { userId: messageUser });
 
-    controller.storage.teams.get(message.team_id, function(err, res) {
-
-      var thisUser = _.findWhere(res.users, { userId: messageUser });
-
-      var emojiMessage = 0;
-      var thisEmoji;
+      let emojiMessage = 0;
+      let thisEmoji;
 
       // Split the message by spaces and iterate
       _.each(message.event.text.split(" "), function(word) {
         // If the word is an emoji
         // Set thisEmoji to the word
         if (emojis.includes(word)) {
-          console.log("it's an emoji!");
+          // console.log("it's an emoji!");
           if (!thisEmoji || thisEmoji == word) {
             thisEmoji = word;
             emojiMessage = 1;
@@ -76,8 +77,8 @@ module.exports = function(controller) {
 
       // Send the effect to the warmth event
       controller.trigger("warmth", [bot, message, thisUser, amount, thisEmoji]);
-
-    });
+      
+    }).catch(err => console.log(err))
 
   });
 

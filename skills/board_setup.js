@@ -22,17 +22,19 @@ var positions = {
 module.exports = function(controller) {
   controller.on("board_setup", function(bot, message, type, stage) {
     
-    // console.log(message, type);
+    console.log(message, type);
 
-    var team = message.team.id ? message.team.id : message.team;
+    var teamId = message.team.id ? message.team.id : message.team;
 
-    controller.studio.get(bot, "board_stage_" + stage, message.user, message.channel).then(function(convo) {
+    controller.store.getTeam(teamId)
+    .then(team => {
       
-      var thread = convo.threads.default[0];
+      controller.studio.get(bot, "board_stage_" + stage, message.user, message.channel)
+      .then(convo => {
       
-      controller.storage.teams.get(team, function(err, team) {
+        var thread = convo.threads.default[0];
         
-        var thisUser = _.findWhere(team.users, { userId: message.user });
+        let thisUser = _.findWhere(team.users, { userId: message.user });
         
         var boardSetup = setUpBoard(type, thisUser.creature, stage);
         var board = boardSetup.board;
@@ -73,16 +75,17 @@ module.exports = function(controller) {
           thread.icon_url = url;
           thread.username = controller.getUsername(thisUser.tamagotchi_type, thisUser.tamagotchi_stage);
           
-          controller.storage.teams.save(team, function(err, saved) {
-            convo.activate();
-          });
+          controller.store.teams[team.id] = team
+          
+          convo.activate()
 
         });
         
-        
-      });
+      })
+      .catch(err => controller.logger.error(err))
       
-    });
+    })
+    .catch(err => controller.logger.error(err));
       
   });
 };
@@ -213,5 +216,5 @@ function setUpBoard(type, creature, stage) {
 
   });
   
-  return { board:board, startingTile: startingTile, foodReplacements: foodReplacements };
+  return { board: board, startingTile: startingTile, foodReplacements: foodReplacements };
 }

@@ -13,35 +13,34 @@ const creatures = {
 
 module.exports = function(controller) {
 
-  controller.on('new', function(bot, message) {
+  controller.on('new', function(bot, message, type) {
 
     var messageUser = message.user ? message.user : message.event.user;
-
-    controller.storage.teams.get(bot.config.id, function(err, res) {
-
-      var thisUser = _.findWhere(res.users, { userId: messageUser });
-      console.log(thisUser);
-      // trigger new tamagotchi
-      controller.trigger("start", [{
-        bot: bot,
-        message: message,
-        team: res,
-        user: thisUser,
-        type: thisUser.tamagotchi_type
-      }]);
-
-    });
+    
+    controller.store.getTeam(bot.config.id)
+      .then(team => {
+      
+        var thisUser = _.findWhere(team.users, { userId: messageUser });
+        console.log(`${thisUser} is about to start a new ${type} egg`);
+        // trigger new tamagotchi
+        controller.trigger("start", [{
+          bot: bot,
+          message: message,
+          team: team,
+          user: thisUser,
+          type: type
+        }]);
+        
+      }).catch(err => controller.logger.error(err))
 
   });
 
   controller.on('start', function(options) {
 
-    console.log("starting over");
-
-    var message = options.message;
-    var bot = options.bot;
-    var team = options.team;
-    var thisUser = options.user;
+    const message = options.message;
+    const bot = options.bot;
+    let team = options.team;
+    let thisUser = options.user;
 
     thisUser.hatched = false;
 
@@ -66,20 +65,15 @@ module.exports = function(controller) {
     });
 
     team.users = users;
-
-    // console.log(team.users);
-
-    controller.storage.teams.save(team, function(err, saved) {
-      // console.log(err, saved.users);
-      var savedUser = _.findWhere(saved.users, { userId: thisUser.userId });
-      // console.log(savedUser);
-      controller.trigger("egg", [bot, message, savedUser, thisUser.tamagotchi_type]);
-    });
+    
+    controller.store.teams[team.id] = team
+    
+    controller.trigger("egg", [bot, message, thisUser, thisUser.tamagotchi_type]);
 
   });
 
   controller.on("egg", function(bot, message, user, type) {
-    var text;
+    let text;
 
     if (["chicken", "shrimp", "snake"].includes(type))
       text = "Hello! Please hatch me. I’m cold. Can you warm me up?";
@@ -281,14 +275,14 @@ module.exports = function(controller) {
 
 
 
-  var saveTeam = function(teamId, user, cb) {
+  const saveTeam = function(teamId, user, cb) {
 
-    controller.storage.teams.get(teamId, function(err, result) {
+    controller.store.getTeam(teamId)
+    .then(result => {
 
-      // console.log(result, "is the team being saved");
-      var currentUser;
+      let currentUser;
 
-      var updated = _.map(result.users, function(u) {
+      let updated = _.map(result.users, function(u) {
         if (u.userId == user.userId) {
           currentUser = user;
           return user;
@@ -297,14 +291,14 @@ module.exports = function(controller) {
       });
 
       result.users = updated;
-      // console.log(currentUser.newChicken, "is the current user newChicken");
+      
+      controller.store.teams[teamId] = result
+      
+      console.log("sending back the current user", currentUser)
+      
+      if (cb) cb(currentUser)
 
-      controller.storage.teams.save(result, function(err, saved) {
-        // console.log(err, _.findWhere(saved.users, { userId: currentUser.userId }));
-        if (cb) cb(currentUser);
-      });
-
-    });
+    }).catch(err => console.log(err));
 
   }
 

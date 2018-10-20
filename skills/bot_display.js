@@ -48,6 +48,8 @@ const evolveNames = {
 
 module.exports = function(controller) {
   
+  controller.botIcons = botIcons
+  
   controller.getUsername = function(creature, stage) {
     var names = [eggNames, hatchNames, evolveNames][stage];
     var username = names[creature];
@@ -55,11 +57,11 @@ module.exports = function(controller) {
   }
   
   controller.getIcon = function(creature, cb) {
-    console.log(creature, " is the creature we need an icon for");
+    // console.log(creature, " is the creature we need an icon for");
     creature = creature.replace(/:/g, "").replace(/-/g, "");
     
     var url = botIcons[creature];
-    console.log(url, "is the url we found for htat creatures icon");
+    // console.log(url, "is the url we found for htat creatures icon");
     
     cb(url);
     

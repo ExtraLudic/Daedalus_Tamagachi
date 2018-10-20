@@ -15,8 +15,8 @@ module.exports = function(controller) {
       time: new Date()
     }
 
-    console.log(event, event.raw_message);
-    console.log(event.original_message);
+//     console.log(event, event.raw_message);
+//     console.log(event.original_message);
 
     if (type == "button") {
       var value = event.actions[0].value ? event.actions[0].value : event.actions[0].selected_options[0].value;
@@ -46,10 +46,10 @@ module.exports = function(controller) {
       }
     }
 
-    console.log(dataEvent);
+    // console.log(dataEvent);
 
     controller.storage[storage].save(dataEvent, function(err, saved) {
-      console.log(err, saved, "SAVED!!");
+      console.log(err, saved, " Data SAVED!!");
     });
 
   };
