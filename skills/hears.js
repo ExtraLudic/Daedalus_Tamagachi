@@ -67,8 +67,8 @@ module.exports = function(controller) {
 
   });
 
-  controller.hears(["restart"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
 
+  controller.hears(["restart", "start"], ["direct_message","direct_mention","mention","ambient"], function(bot,message) {
     console.log("start");
     if (process.env.environment != 'dev') return;
     controller.trigger("new", [bot, message]);
